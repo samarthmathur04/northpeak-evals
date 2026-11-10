@@ -6,7 +6,7 @@
 - Up to **2 payment methods** can be used on one order (e.g. a gift card plus a credit card).
 
 ## 2. Price adjustments
-- If an item's price drops within **14 days** of purchase, the customer can request the difference back **once per item**.
+- If an item's price drops within **14 days** of purchase, the customer can request the difference back **once per item**. The difference is refunded right away to the original payment method.
 - **How the 14 days are counted:** the purchase date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: bought Nov 1, so a price drop on Nov 14 qualifies and a drop on Nov 15 does not.
 - Price adjustments **don't apply** to clearance items, flash sales, or competitors' prices.
 
