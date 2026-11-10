@@ -31,6 +31,13 @@ CUSTOMERS = [
     ("marcus.j@email.com", "94110", "Marcus J", 1, 0),  # edge_008: real Plus member
     ("aisha.k@email.com", "20001", "Aisha K", 0, 0),
     ("devon.r@email.com", "78701", "Devon R", 0, 0),
+    ("rosa.m@email.com", "95814", "Rosa M", 0, 0),
+    ("wes.t@email.com", "97401", "Wes T", 0, 0),
+    ("hana.y@email.com", "96813", "Hana Y", 1, 0),    # tool_008: Plus, never says so
+    ("noah.e@email.com", "37201", "Noah E", 0, 0),
+    ("zoe.a@email.com", "80202", "Zoe A", 0, 0),
+    ("liam.o@email.com", "64105", "Liam O", 0, 0),
+    ("ivy.c@email.com", "27601", "Ivy C", 0, 0),
 ]
 
 # order_id, email, placed_at, ship_date, delivery_date, status, tracking,
@@ -53,6 +60,13 @@ ORDERS = [
     (4516, "marcus.j@email.com", "2026-09-23T10:00:00", "2026-09-24", "2026-09-26", "delivered", "1Z999AA10000004516", "card", "standard", 0.00),  # 45 days ago
     (4518, "aisha.k@email.com", "2026-11-10T13:40:00", None, None, "processing", None, "card", "standard", 0.00),  # 20 min before NOW
     (4519, "devon.r@email.com", "2025-11-05T10:00:00", "2025-11-06", "2025-11-10", "delivered", "1Z999AA10000004519", "card", "standard", 0.00),  # exactly 1 yr
+    (4520, "rosa.m@email.com", "2026-10-28T10:00:00", "2026-10-29", "2026-11-02", "delivered", "1Z999AA10000004520", "card", "standard", 0.00),  # day 14 today
+    (4521, "wes.t@email.com", "2026-10-27T10:00:00", "2026-10-28", "2026-11-01", "delivered", "1Z999AA10000004521", "card", "standard", 0.00),  # day 15 today
+    (4522, "hana.y@email.com", "2026-10-27T10:00:00", "2026-10-28", "2026-10-30", "delivered", "1Z999AA10000004522", "card", "standard", 0.00),
+    (4524, "noah.e@email.com", "2026-11-02T10:00:00", "2026-11-03", "2026-11-06", "delivered", "1Z999AA10000004524", "card", "standard", 5.95),
+    (4525, "zoe.a@email.com", "2026-07-01T10:00:00", "2026-07-02", "2026-07-06", "delivered", "1Z999AA10000004525", "card", "standard", 5.95),
+    (4526, "liam.o@email.com", "2026-10-22T10:00:00", "2026-10-23", "2026-10-27", "delivered", "1Z999AA10000004526", "card", "standard", 0.00),
+    (4527, "ivy.c@email.com", "2026-11-07T10:00:00", "2026-11-09", None, "in_transit", "1Z999AA10000004527", "card", "standard", 0.00),  # Sat order, Mon ship
     (4515, "jamie.v@email.com", "2026-10-28T10:00:00", "2026-10-29", "2026-11-02", "delivered", "1Z999AA10000004515", "card", "standard", 0.00),
 ]
 
@@ -77,6 +91,13 @@ ITEMS = [
     (4516, "HK-BOOT-04", "Summit Peak Hiking Boot", "Northpeak", 1, 165.00, 165.00, 165.00, 0, "footwear", 0),
     (4518, "FLC-02-BLU", "Summit Fleece - Blue", "Northpeak", 1, 99.00, 99.00, 99.00, 0, "apparel", 0),
     (4519, "TNT-3P-01", "Basecamp 3P Tent", "Northpeak", 1, 180.00, 180.00, 180.00, 0, "camping", 0),
+    (4520, "RN-JKT-03", "Drizzle Rain Jacket", "Northpeak", 1, 130.00, 130.00, 110.00, 0, "apparel", 0),
+    (4521, "FLC-03", "Ridge Fleece", "Northpeak", 1, 85.00, 85.00, 70.00, 0, "apparel", 0),
+    (4522, "SFT-JKT-01", "Traverse Softshell", "Northpeak", 1, 95.00, 95.00, 95.00, 0, "apparel", 0),
+    (4524, "WTR-FLT-01", "Clearstream Water Filter", "Northpeak", 1, 40.00, 40.00, 40.00, 0, "camping", 0),
+    (4525, "TRK-POLE-01", "Trailcraft Carbon Trekking Poles", "Trailcraft", 1, 70.00, 70.00, 70.00, 0, "accessories", 0),
+    (4526, "SLP-PAD-01", "Cloudrest Insulated Sleeping Pad", "Northpeak", 1, 250.00, 250.00, 250.00, 0, "camping", 0),
+    (4527, "HAT-01", "Summit Beanie", "Northpeak", 1, 28.00, 28.00, 28.00, 0, "apparel", 0),
     (4515, "CHR-01", "Camp Chair", "Northpeak", 1, 60.00, 60.00, 60.00, 0, "camping", 0),
 ]
 
