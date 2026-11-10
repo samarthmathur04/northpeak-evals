@@ -4,3 +4,5 @@ __pycache__/
 .venv/
 .DS_Store
 data/*.db
+CLAUDE.md
+AGENTS.md
