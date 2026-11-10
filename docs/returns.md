@@ -36,6 +36,6 @@
 
 ## 7. Damaged or wrong items
 - Report damaged or wrong items within **14 days of delivery**, with at least **one photo**.
-- These get a full refund **including original shipping**, and no return fee. The refund is issued **right away** once the photo is reviewed; the customer doesn't have to wait for the item to arrive back.
+- These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.
 - **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.
 - Reports after 14 days are handled under the Warranty Policy instead.
