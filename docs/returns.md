@@ -2,6 +2,7 @@
 
 ## 1. Return window
 - Most items can be returned within **30 days of the delivery date**.
+- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).
 - Items must be unused, with original tags attached.
 - **Northpeak Plus members** get a **60-day** return window.
 - Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later.
