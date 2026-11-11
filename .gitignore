@@ -6,3 +6,4 @@ __pycache__/
 data/*.db
 CLAUDE.md
 AGENTS.md
+LEARNING_LOG.md
