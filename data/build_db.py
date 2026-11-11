@@ -102,6 +102,7 @@ ITEMS = [
 ]
 
 SCHEMA = """
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
 CREATE TABLE customers (
     email TEXT PRIMARY KEY, zip TEXT, name TEXT,
     is_plus_member INTEGER, refunds_last_90_days INTEGER
@@ -123,6 +124,7 @@ def build(path: Path = DB_PATH) -> None:
     path.unlink(missing_ok=True)
     con = sqlite3.connect(path)
     con.executescript(SCHEMA)
+    con.execute("INSERT INTO meta VALUES ('now', ?)", (NOW,))
     con.executemany("INSERT INTO customers VALUES (?,?,?,?,?)", CUSTOMERS)
     con.executemany("INSERT INTO orders VALUES (?,?,?,?,?,?,?,?,?,?)", ORDERS)
     con.executemany("INSERT INTO order_items VALUES (?,?,?,?,?,?,?,?,?,?,?)", ITEMS)
