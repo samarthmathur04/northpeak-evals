@@ -10,6 +10,7 @@ from pathlib import Path
 
 from app.embed import MODEL_NAME
 from app.bm25 import retrieve_bm25
+from app.hybrid import retrieve_rrf, retrieve_weighted
 from app.retrieve import retrieve
 
 GOLDEN = Path("evals/golden_v1.jsonl")
@@ -23,7 +24,8 @@ def recall_at_k(relevant: list[str], retrieved: list[str]) -> float:
     return hits / len(relevant)
 
 
-RETRIEVERS = {"dense": retrieve, "bm25": retrieve_bm25}
+RETRIEVERS = {"dense": retrieve, "bm25": retrieve_bm25,
+              "rrf": retrieve_rrf, "weighted": retrieve_weighted}
 
 
 def main():

@@ -1,0 +1,589 @@
+{
+  "mode": "rrf",
+  "model": null,
+  "summary": {
+    "1": {
+      "mean_recall": 0.6571428571428571,
+      "full_hit_rate": 0.6285714285714286
+    },
+    "3": {
+      "mean_recall": 0.7428571428571429,
+      "full_hit_rate": 0.7142857142857143
+    },
+    "5": {
+      "mean_recall": 0.8666666666666666,
+      "full_hit_rate": 0.8
+    }
+  },
+  "cases": [
+    {
+      "id": "simple_001",
+      "relevant": [
+        "shipping#2"
+      ],
+      "retrieved": [
+        "shipping#2",
+        "returns#3",
+        "returns#7",
+        "shipping#3",
+        "returns#1"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_002",
+      "relevant": [
+        "payments#1"
+      ],
+      "retrieved": [
+        "payments#1",
+        "payments#4",
+        "account#2",
+        "returns#3",
+        "shipping#1"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_003",
+      "relevant": [
+        "payments#4"
+      ],
+      "retrieved": [
+        "payments#4",
+        "payments#1",
+        "payments#3",
+        "returns#3",
+        "account#1"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_004",
+      "relevant": [
+        "shipping#1"
+      ],
+      "retrieved": [
+        "shipping#1",
+        "shipping#3",
+        "shipping#5",
+        "payments#1",
+        "shipping#6"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_005",
+      "relevant": [
+        "account#1"
+      ],
+      "retrieved": [
+        "account#1",
+        "warranty#4",
+        "warranty#3",
+        "returns#1",
+        "account#5"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_006",
+      "relevant": [
+        "warranty#2"
+      ],
+      "retrieved": [
+        "warranty#2",
+        "warranty#3",
+        "warranty#1",
+        "returns#2",
+        "warranty#4"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_003",
+      "relevant": [
+        "returns#1",
+        "returns#3",
+        "returns#6"
+      ],
+      "retrieved": [
+        "shipping#5",
+        "warranty#2",
+        "warranty#3",
+        "account#2",
+        "returns#6"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.3333333333333333
+    },
+    {
+      "id": "tool_004",
+      "relevant": [
+        "returns#7"
+      ],
+      "retrieved": [
+        "returns#7",
+        "shipping#2",
+        "warranty#3",
+        "shipping#4",
+        "returns#1"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_005",
+      "relevant": [
+        "returns#3"
+      ],
+      "retrieved": [
+        "returns#3",
+        "payments#4",
+        "payments#1",
+        "returns#4",
+        "account#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_006",
+      "relevant": [
+        "payments#2"
+      ],
+      "retrieved": [
+        "payments#2",
+        "account#1",
+        "shipping#6",
+        "returns#1",
+        "shipping#4"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_001",
+      "relevant": [
+        "returns#1",
+        "returns#2"
+      ],
+      "retrieved": [
+        "returns#6",
+        "warranty#3",
+        "returns#3",
+        "account#2",
+        "returns#1"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.5
+    },
+    {
+      "id": "edge_002",
+      "relevant": [
+        "returns#4"
+      ],
+      "retrieved": [
+        "returns#4",
+        "returns#3",
+        "returns#7",
+        "returns#5",
+        "account#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_003",
+      "relevant": [
+        "returns#1"
+      ],
+      "retrieved": [
+        "returns#1",
+        "returns#3",
+        "returns#7",
+        "payments#4",
+        "payments#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_004",
+      "relevant": [
+        "warranty#1",
+        "warranty#3"
+      ],
+      "retrieved": [
+        "returns#5",
+        "returns#3",
+        "shipping#5",
+        "warranty#3",
+        "payments#3"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.5
+    },
+    {
+      "id": "edge_005",
+      "relevant": [
+        "returns#2"
+      ],
+      "retrieved": [
+        "returns#2",
+        "shipping#1",
+        "returns#7",
+        "returns#3",
+        "returns#6"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_006",
+      "relevant": [
+        "shipping#2",
+        "shipping#3"
+      ],
+      "retrieved": [
+        "shipping#2",
+        "shipping#3",
+        "shipping#5",
+        "account#2",
+        "shipping#4"
+      ],
+      "recall@1": 0.5,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_007",
+      "relevant": [
+        "payments#3"
+      ],
+      "retrieved": [
+        "account#2",
+        "payments#3",
+        "shipping#5",
+        "shipping#3",
+        "payments#2"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "escalate_001",
+      "relevant": [
+        "returns#5",
+        "returns#7"
+      ],
+      "retrieved": [
+        "returns#3",
+        "warranty#3",
+        "returns#5",
+        "shipping#4",
+        "returns#7"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.5,
+      "recall@5": 1.0
+    },
+    {
+      "id": "escalate_002",
+      "relevant": [
+        "returns#5"
+      ],
+      "retrieved": [
+        "returns#7",
+        "returns#3",
+        "returns#6",
+        "shipping#5",
+        "shipping#6"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.0
+    },
+    {
+      "id": "escalate_003",
+      "relevant": [
+        "account#4"
+      ],
+      "retrieved": [
+        "account#4",
+        "account#2",
+        "account#5",
+        "account#3",
+        "shipping#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "refuse_001",
+      "relevant": [
+        "account#5"
+      ],
+      "retrieved": [
+        "account#5",
+        "returns#6",
+        "account#2",
+        "warranty#3",
+        "payments#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "refuse_002",
+      "relevant": [
+        "account#2"
+      ],
+      "retrieved": [
+        "account#2",
+        "account#3",
+        "account#4",
+        "account#1",
+        "payments#1"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_008",
+      "relevant": [
+        "returns#1",
+        "account#1"
+      ],
+      "retrieved": [
+        "account#2",
+        "returns#7",
+        "returns#3",
+        "returns#1",
+        "account#3"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.5
+    },
+    {
+      "id": "edge_009",
+      "relevant": [
+        "warranty#4"
+      ],
+      "retrieved": [
+        "warranty#4",
+        "warranty#3",
+        "warranty#2",
+        "returns#7",
+        "payments#4"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_007",
+      "relevant": [
+        "shipping#5"
+      ],
+      "retrieved": [
+        "shipping#5",
+        "returns#7",
+        "shipping#6",
+        "returns#6",
+        "account#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "escalate_004",
+      "relevant": [
+        "warranty#1",
+        "warranty#3"
+      ],
+      "retrieved": [
+        "warranty#3",
+        "returns#5",
+        "returns#7",
+        "returns#1",
+        "warranty#1"
+      ],
+      "recall@1": 0.5,
+      "recall@3": 0.5,
+      "recall@5": 1.0
+    },
+    {
+      "id": "simple_007",
+      "relevant": [
+        "payments#2"
+      ],
+      "retrieved": [
+        "returns#6",
+        "payments#2",
+        "returns#4",
+        "warranty#3",
+        "returns#3"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_010",
+      "relevant": [
+        "payments#2"
+      ],
+      "retrieved": [
+        "payments#2",
+        "shipping#2",
+        "shipping#5",
+        "shipping#4",
+        "returns#7"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "edge_011",
+      "relevant": [
+        "payments#2"
+      ],
+      "retrieved": [
+        "payments#2",
+        "returns#6",
+        "returns#4",
+        "shipping#2",
+        "shipping#5"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_008",
+      "relevant": [
+        "returns#1",
+        "returns#3"
+      ],
+      "retrieved": [
+        "returns#6",
+        "account#2",
+        "shipping#5",
+        "returns#3",
+        "warranty#2"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.5
+    },
+    {
+      "id": "simple_008",
+      "relevant": [
+        "payments#4"
+      ],
+      "retrieved": [
+        "payments#4",
+        "returns#3",
+        "payments#1",
+        "shipping#4",
+        "payments#3"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "escalate_005",
+      "relevant": [
+        "payments#5"
+      ],
+      "retrieved": [
+        "payments#5",
+        "shipping#5",
+        "shipping#4",
+        "returns#6",
+        "shipping#2"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "tool_009",
+      "relevant": [
+        "warranty#1"
+      ],
+      "retrieved": [
+        "warranty#4",
+        "warranty#3",
+        "returns#7",
+        "shipping#4",
+        "warranty#1"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 1.0
+    },
+    {
+      "id": "escalate_006",
+      "relevant": [
+        "returns#5"
+      ],
+      "retrieved": [
+        "account#2",
+        "shipping#5",
+        "account#3",
+        "shipping#4",
+        "returns#1"
+      ],
+      "recall@1": 0.0,
+      "recall@3": 0.0,
+      "recall@5": 0.0
+    },
+    {
+      "id": "tool_010",
+      "relevant": [
+        "account#2"
+      ],
+      "retrieved": [
+        "account#2",
+        "account#3",
+        "shipping#5",
+        "returns#6",
+        "account#4"
+      ],
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0
+    }
+  ]
+}
