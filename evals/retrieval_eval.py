@@ -3,11 +3,13 @@
 Run: python -m evals.retrieval_eval
 """
 
+import argparse
 import json
 from datetime import datetime
 from pathlib import Path
 
 from app.embed import MODEL_NAME
+from app.bm25 import retrieve_bm25
 from app.retrieve import retrieve
 
 GOLDEN = Path("evals/golden_v1.jsonl")
@@ -21,19 +23,27 @@ def recall_at_k(relevant: list[str], retrieved: list[str]) -> float:
     return hits / len(relevant)
 
 
+RETRIEVERS = {"dense": retrieve, "bm25": retrieve_bm25}
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--mode", choices=RETRIEVERS, default="dense")
+    mode = ap.parse_args().mode
+    retrieve_fn = RETRIEVERS[mode]
+
     cases = [json.loads(l) for l in GOLDEN.read_text().splitlines() if l.strip()]
     cases = [c for c in cases if c["relevant_chunks"]]  # skip "no doc needed" cases
 
     rows = []
     for c in cases:
-        retrieved = [r["id"] for r in retrieve(c["message"], k=max(KS))]
+        retrieved = [r["id"] for r in retrieve_fn(c["message"], k=max(KS))]
         row = {"id": c["id"], "relevant": c["relevant_chunks"], "retrieved": retrieved}
         for k in KS:
             row[f"recall@{k}"] = recall_at_k(c["relevant_chunks"], retrieved[:k])
         rows.append(row)
 
-    print(f"{len(rows)} cases (skipped no-doc cases)\n")
+    print(f"[{mode}] {len(rows)} cases (skipped no-doc cases)\n")
     summary = {}
     for k in KS:
         recalls = [r[f"recall@{k}"] for r in rows]
@@ -51,8 +61,8 @@ def main():
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out = RESULTS_DIR / f"retrieval_{stamp}.json"
-    out.write_text(json.dumps({"model": MODEL_NAME, "summary": summary, "cases": rows}, indent=2))
+    out = RESULTS_DIR / f"retrieval_{mode}_{stamp}.json"
+    out.write_text(json.dumps({"mode": mode, "model": MODEL_NAME if mode == "dense" else None, "summary": summary, "cases": rows}, indent=2))
     print(f"\nSaved {out}")
 
 
