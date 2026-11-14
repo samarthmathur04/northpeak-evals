@@ -58,9 +58,13 @@ class Session:
         return {"verified": ok}
 
     def lookup_order(self, order_id: int) -> dict:
-        # TODO (Samarth): GUARD. Refuse unless the order's owner is verified in this session.
-        #   Hint: _order_email(order_id), self.verified_emails. Also: what if the order doesn't exist?
-        #   Return an {"error": ...} dict, don't raise. The model reads the error and recovers.
+        # GUARD: only the verified owner of THIS order may see it.
+        # Same message for "doesn't exist" and "not yours" -> attackers can't
+        # probe which order numbers are real (enumeration attack).
+        owner = _order_email(order_id)
+        if owner is None or owner.lower() not in self.verified_emails:
+            return {"error": "Can't share this order. Verify the customer with "
+                             "verify_customer using the email on this order."}
         with _db() as con:
             o = con.execute("SELECT * FROM orders WHERE order_id = ?", (order_id,)).fetchone()
             if o is None:
