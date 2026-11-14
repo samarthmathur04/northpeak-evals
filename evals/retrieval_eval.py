@@ -11,6 +11,7 @@ from pathlib import Path
 from app.embed import MODEL_NAME
 from app.bm25 import retrieve_bm25
 from app.hybrid import retrieve_rrf, retrieve_weighted
+from app.query_clean import clean_query
 from app.retrieve import retrieve
 
 GOLDEN = Path("evals/golden_v1.jsonl")
@@ -31,15 +32,17 @@ RETRIEVERS = {"dense": retrieve, "bm25": retrieve_bm25,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=RETRIEVERS, default="dense")
-    mode = ap.parse_args().mode
-    retrieve_fn = RETRIEVERS[mode]
+    ap.add_argument("--clean", action="store_true", help="strip emails/order #s from queries")
+    args = ap.parse_args()
+    mode = args.mode + ("+clean" if args.clean else "")
+    retrieve_fn = RETRIEVERS[args.mode]
 
     cases = [json.loads(l) for l in GOLDEN.read_text().splitlines() if l.strip()]
     cases = [c for c in cases if c["relevant_chunks"]]  # skip "no doc needed" cases
 
     rows = []
     for c in cases:
-        retrieved = [r["id"] for r in retrieve_fn(c["message"], k=max(KS))]
+        retrieved = [r["id"] for r in retrieve_fn(clean_query(c["message"]) if args.clean else c["message"], k=max(KS))]
         row = {"id": c["id"], "relevant": c["relevant_chunks"], "retrieved": retrieved}
         for k in KS:
             row[f"recall@{k}"] = recall_at_k(c["relevant_chunks"], retrieved[:k])
@@ -64,7 +67,7 @@ def main():
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out = RESULTS_DIR / f"retrieval_{mode}_{stamp}.json"
-    out.write_text(json.dumps({"mode": mode, "model": MODEL_NAME if mode == "dense" else None, "summary": summary, "cases": rows}, indent=2))
+    out.write_text(json.dumps({"mode": mode, "model": MODEL_NAME if args.mode != "bm25" else None, "summary": summary, "cases": rows}, indent=2))
     print(f"\nSaved {out}")
 
 
