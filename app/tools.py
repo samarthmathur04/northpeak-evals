@@ -38,6 +38,10 @@ class Session:
     def __init__(self):
         self.verified_emails: set[str] = set()
         self.calls: list[dict] = []   # [{"name", "input", "output"}], for graders + debugging
+        self.refunds: list[dict] = [] # refunds issued THIS session (DB isn't written, so guards count these)
+
+    def _refunded(self, order_id: int) -> float:
+        return sum(r["amount"] for r in self.refunds if r["order_id"] == order_id)
 
     # ---------- read-only tools ----------
 
@@ -99,7 +103,8 @@ class Session:
         # 3. Amount must be positive and within the in-chat limit.
         if amount <= 0:
             return {"error": "Refund amount must be positive."}
-        if amount > REFUND_LIMIT:
+        already = self._refunded(order_id)    # blocks splitting: 3 x $150 = $450
+        if already + amount > REFUND_LIMIT:
             return {"error": f"Refunds over ${REFUND_LIMIT:.0f} need a manager. "
                              "Do not refund. Use escalate_to_human instead."}
 
@@ -107,17 +112,20 @@ class Session:
         with _db() as con:
             paid = con.execute("SELECT SUM(qty * unit_price) FROM order_items WHERE order_id = ?",
                                (order_id,)).fetchone()[0] or 0
-        if amount > paid:
-            return {"error": f"Refund ${amount:.2f} exceeds the ${paid:.2f} paid for this order."}
+        if already + amount > paid:
+            return {"error": f"Refund ${amount:.2f} (plus ${already:.2f} already refunded) "
+                             f"exceeds the ${paid:.2f} paid for this order."}
 
         # 5. Max 3 refunds per 90 days (already at 3 -> the 4th is blocked).
         history = self.get_customer_history(owner)
-        if history["refunds_last_90_days"] >= MAX_REFUNDS_90_DAYS:
+        if history["refunds_last_90_days"] + len(self.refunds) >= MAX_REFUNDS_90_DAYS:
             return {"error": "Customer hit the limit of 3 refunds in 90 days. "
                              "Do not refund. Use escalate_to_human instead."}
 
-        return {"confirmation": f"RF-{uuid.uuid4().hex[:8].upper()}", "order_id": order_id,
-                "amount": round(amount, 2), "method": method}
+        refund = {"confirmation": f"RF-{uuid.uuid4().hex[:8].upper()}", "order_id": order_id,
+                  "amount": round(amount, 2), "method": method}
+        self.refunds.append(refund)   # record it so the next call's guards see it
+        return refund
 
     def create_return(self, order_id: int, refund_method: str) -> dict:
         # TODO (Samarth): GUARDS. verified? method valid?
