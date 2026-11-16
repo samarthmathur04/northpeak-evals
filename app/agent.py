@@ -57,20 +57,27 @@ def run_agent(message: str) -> dict:
     system = build_system_prompt(retrieve(message))
     messages = [{"role": "user", "content": message}]
 
-    # TODO (Samarth): the loop. Up to MAX_STEPS times:
-    #   1. response = client.messages.create(model=MODEL, max_tokens=1024,
-    #                                        system=system, tools=TOOLS, messages=messages)
-    #   2. Append the model's turn: messages.append({"role": "assistant", "content": response.content})
-    #   3. If response.stop_reason != "tool_use": the model is done -> grab its text, return.
-    #        text = "".join(b.text for b in response.content if b.type == "text")
-    #   4. Otherwise, for EACH block with b.type == "tool_use":
-    #        out = session.run(b.name, b.input)
-    #        collect {"type": "tool_result", "tool_use_id": b.id, "content": json.dumps(out)}
-    #      then messages.append({"role": "user", "content": <all those results>})
-    #   5. If the loop runs out: return with stop="max_steps" (counts as a failure).
-    #
-    # Question to answer before writing: why do tool results go back with role "user"?
-    raise NotImplementedError
+    for _ in range(MAX_STEPS):
+        # 1. Ask the model. It sees: rules + policy (system), tools, conversation so far.
+        response = client.messages.create(model=MODEL, max_tokens=1024, system=system,
+                                          tools=TOOLS, messages=messages)
+        # 2. Save its turn. The API is stateless: next call must include the whole history.
+        messages.append({"role": "assistant", "content": response.content})
+
+        # 3. No tool request -> it's answering the customer. Done.
+        if response.stop_reason != "tool_use":
+            text = "".join(b.text for b in response.content if b.type == "text")
+            return _result(text, session, response.stop_reason)
+
+        # 4. It asked for tools. OUR code runs them (guards live in session.run), and every
+        #    result is tagged with the request's id so the model can match them up.
+        results = [{"type": "tool_result", "tool_use_id": b.id, "content": json.dumps(out)}
+                   for b in response.content if b.type == "tool_use"
+                   for out in [session.run(b.name, b.input)]]
+        messages.append({"role": "user", "content": results})
+
+    # 5. Hit the cap: stuck in a tool loop. Graded as a failure, never hangs the eval.
+    return _result("", session, "max_steps")
 
 
 def _result(text: str, session: Session, stop: str) -> dict:
