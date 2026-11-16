@@ -17,6 +17,10 @@ client = anthropic.Anthropic()
 
 # Tool schemas: what the model SEES. The descriptions are prompts too: be precise.
 TOOLS = [
+    {"name": "search_policy",
+     "description": "Search the store policy docs. Use it whenever the <policy> section doesn't contain "
+                    "a rule you need (e.g. a return window, refund limit, warranty term) BEFORE saying you don't know.",
+     "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
     {"name": "verify_customer",
      "description": "Verify the customer's identity. Required before sharing or acting on any order or account info.",
      "input_schema": {"type": "object", "properties": {
@@ -51,13 +55,17 @@ TOOLS = [
 ]
 
 
-def run_agent(message: str) -> dict:
-    """Answer one customer message. Returns everything the graders need."""
+def run_agent(message: str, followups: list[str] | None = None) -> dict:
+    """Answer one customer message, plus optional scripted customer replies
+    (e.g. "yes, go ahead") for cases where the agent should confirm before acting.
+    Same Session across turns, so tool calls and verification carry over."""
     session = Session()
     system = build_system_prompt(retrieve(message))
     messages = [{"role": "user", "content": message}]
+    pending = list(followups or [])
+    replies = []
 
-    for _ in range(MAX_STEPS):
+    for _ in range(MAX_STEPS * (1 + len(pending))):
         # 1. Ask the model. It sees: rules + policy (system), tools, conversation so far.
         response = client.messages.create(model=MODEL, max_tokens=1024, system=system,
                                           tools=TOOLS, messages=messages)
@@ -66,8 +74,11 @@ def run_agent(message: str) -> dict:
 
         # 3. No tool request -> it's answering the customer. Done.
         if response.stop_reason != "tool_use":
-            text = "".join(b.text for b in response.content if b.type == "text")
-            return _result(text, session, response.stop_reason)
+            replies.append("".join(b.text for b in response.content if b.type == "text"))
+            if pending:  # simulated customer answers the agent's question, loop continues
+                messages.append({"role": "user", "content": pending.pop(0)})
+                continue
+            return _result("\n---\n".join(replies), session, response.stop_reason)
 
         # 4. It asked for tools. OUR code runs them (guards live in session.run), and every
         #    result is tagged with the request's id so the model can match them up.

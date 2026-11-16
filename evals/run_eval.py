@@ -24,7 +24,7 @@ RESULTS = Path("evals/results")
 def run_case(case: dict) -> dict:
     t0 = time.time()
     try:
-        result = run_agent(case["message"])
+        result = run_agent(case["message"], case.get("followups"))
         error = None
     except Exception as e:  # one crash shouldn't kill the whole run; it's a graded failure
         result, error = {"reply": "", "tool_calls": [], "stop": "error"}, repr(e)

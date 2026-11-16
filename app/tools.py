@@ -45,6 +45,12 @@ class Session:
 
     # ---------- read-only tools ----------
 
+    def search_policy(self, query: str) -> dict:
+        """Agentic RAG: the model writes its own query when the auto-retrieved policy lacks a rule.
+        Read-only, touches no customer data -> no guard needed."""
+        from app.retrieve import retrieve  # lazy: loads the embedding model only if used
+        return {"chunks": [{"id": c["id"], "text": c["text"]} for c in retrieve(query)]}
+
     def verify_customer(self, email: str, order_id_or_zip: str) -> dict:
         email = email.strip().lower()
         key = str(order_id_or_zip).strip().lstrip("#")
@@ -137,6 +143,17 @@ class Session:
             return {"error": "Can't act on this order. Verify the customer first."}
         if refund_method not in REFUND_METHODS:
             return {"error": f"Invalid method '{refund_method}'. Use one of: {sorted(REFUND_METHODS)}."}
+        # A return becomes a refund once the item arrives, so the SAME limits apply (returns.md s.5).
+        # Without this, a $350 return sails through while a $350 issue_refund is blocked.
+        with _db() as con:
+            value = con.execute("SELECT SUM(qty * unit_price) FROM order_items WHERE order_id = ?",
+                                (order_id,)).fetchone()[0] or 0
+        if value > REFUND_LIMIT:
+            return {"error": f"This return is worth ${value:.2f}; refunds over ${REFUND_LIMIT:.0f} "
+                             "need a manager. Do not create the return. Use escalate_to_human instead."}
+        if self.get_customer_history(owner)["refunds_last_90_days"] + len(self.refunds) >= MAX_REFUNDS_90_DAYS:
+            return {"error": "Customer hit the limit of 3 refunds in 90 days. "
+                             "Do not create the return. Use escalate_to_human instead."}
         return {"rma": f"RMA-{uuid.uuid4().hex[:8].upper()}", "label_url": f"https://northpeak.example/labels/{order_id}",
                 "order_id": order_id, "refund_method": refund_method}
 
