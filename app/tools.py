@@ -135,7 +135,7 @@ class Session:
         self.refunds.append(refund)   # record it so the next call's guards see it
         return refund
 
-    def create_return(self, order_id: int, refund_method: str) -> dict:
+    def create_return(self, order_id: int, refund_method: str, items: list[dict] | None = None) -> dict:
         # HARD GUARDS only. Final sale is NOT blocked here: damaged/wrong final-sale
         # items CAN be returned (returns.md s.2 + s.7), so it's a policy judgment for the model.
         owner = _order_email(order_id)
@@ -146,8 +146,21 @@ class Session:
         # A return becomes a refund once the item arrives, so the SAME limits apply (returns.md s.5).
         # Without this, a $350 return sails through while a $350 issue_refund is blocked.
         with _db() as con:
-            value = con.execute("SELECT SUM(qty * unit_price) FROM order_items WHERE order_id = ?",
-                                (order_id,)).fetchone()[0] or 0
+            rows = con.execute("SELECT sku, qty, unit_price FROM order_items WHERE order_id = ?",
+                               (order_id,)).fetchall()
+        # Partial return: every item must be on this order, with qty <= what was bought.
+        # Otherwise the model could "return" 50 of something the customer bought 1 of.
+        if items:
+            on_order = {r["sku"]: r for r in rows}
+            value = 0.0
+            for it in items:
+                r = on_order.get(it.get("sku"))
+                if r is None or not (0 < it.get("qty", 0) <= r["qty"]):
+                    return {"error": f"Item {it} isn't on order {order_id} in that quantity."}
+                value += it["qty"] * r["unit_price"]
+        else:
+            value = sum(r["qty"] * r["unit_price"] for r in rows)
+        # $200 cap is on what's actually being returned.
         if value > REFUND_LIMIT:
             return {"error": f"This return is worth ${value:.2f}; refunds over ${REFUND_LIMIT:.0f} "
                              "need a manager. Do not create the return. Use escalate_to_human instead."}
@@ -155,7 +168,8 @@ class Session:
             return {"error": "Customer hit the limit of 3 refunds in 90 days. "
                              "Do not create the return. Use escalate_to_human instead."}
         return {"rma": f"RMA-{uuid.uuid4().hex[:8].upper()}", "label_url": f"https://northpeak.example/labels/{order_id}",
-                "order_id": order_id, "refund_method": refund_method}
+                "order_id": order_id, "refund_method": refund_method, "items": items or "all",
+                "value": round(value, 2)}
 
     def cancel_order(self, order_id: int) -> dict:
         # HARD GUARDS: verified owner, and within 1 hour of placement (always true -> code).

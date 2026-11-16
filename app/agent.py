@@ -38,13 +38,21 @@ TOOLS = [
      "description": "Refund money immediately. ONLY for price adjustments. Returns (including damaged items) use create_return.",
      "input_schema": {"type": "object", "properties": {
          "order_id": {"type": "integer"}, "amount": {"type": "number"},
-         "method": {"type": "string", "enum": ["card", "gift_card", "store_credit"]}},
+         "method": {"type": "string", "enum": ["card", "gift_card", "store_credit"],
+                    "description": "Set by policy, not chosen by the customer (original payment method unless policy says otherwise)."}},
          "required": ["order_id", "amount", "method"]}},
     {"name": "create_return",
-     "description": "Start a return: creates a prepaid label and RMA number. The refund is issued when the item arrives.",
+     "description": "Start a return: creates a prepaid label and RMA number. The refund is issued when the item arrives. "
+                    "To return only some items, pass `items`; omit it to return the whole order.",
      "input_schema": {"type": "object", "properties": {
          "order_id": {"type": "integer"},
-         "refund_method": {"type": "string", "enum": ["card", "gift_card", "store_credit"]}},
+         "refund_method": {"type": "string", "enum": ["card", "gift_card", "store_credit"],
+                           "description": "Set by policy, NOT chosen by the customer: the original payment method, "
+                                          "except gift_card for gift card purchases and store_credit for items bought at 40%+ off. "
+                                          "Never ask the customer which method they want."},
+         "items": {"type": "array", "description": "Optional. Items to return, e.g. [{\"sku\": \"FUEL-230\", \"qty\": 3}].",
+                   "items": {"type": "object", "properties": {"sku": {"type": "string"}, "qty": {"type": "integer"}},
+                             "required": ["sku", "qty"]}}},
          "required": ["order_id", "refund_method"]}},
     {"name": "cancel_order",
      "description": "Cancel an order. Only possible within 1 hour of placing it.",
