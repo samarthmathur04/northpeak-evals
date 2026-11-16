@@ -86,10 +86,36 @@ class Session:
     # ---------- action tools (change the world) ----------
 
     def issue_refund(self, order_id: int, amount: float, method: str) -> dict:
-        # TODO (Samarth): GUARDS, in code, before any money moves. Think about:
-        #   - verified?            - amount > REFUND_LIMIT?       - amount <= 0?
-        #   - method valid?        - refunds_last_90_days >= MAX? - amount > what they paid?
-        # Which of these are "hard rules" vs. things the policy/model should judge?
+        # HARD GUARDS: run before any money moves, whatever the model was told.
+        # 1. Only the verified owner of this order.
+        owner = _order_email(order_id)
+        if owner is None or owner.lower() not in self.verified_emails:
+            return {"error": "Can't refund this order. Verify the customer first."}
+
+        # 2. Only real refund methods.
+        if method not in REFUND_METHODS:
+            return {"error": f"Invalid method '{method}'. Use one of: {sorted(REFUND_METHODS)}."}
+
+        # 3. Amount must be positive and within the in-chat limit.
+        if amount <= 0:
+            return {"error": "Refund amount must be positive."}
+        if amount > REFUND_LIMIT:
+            return {"error": f"Refunds over ${REFUND_LIMIT:.0f} need a manager. "
+                             "Do not refund. Use escalate_to_human instead."}
+
+        # 4. Can't refund more than was paid for the items.
+        with _db() as con:
+            paid = con.execute("SELECT SUM(qty * unit_price) FROM order_items WHERE order_id = ?",
+                               (order_id,)).fetchone()[0] or 0
+        if amount > paid:
+            return {"error": f"Refund ${amount:.2f} exceeds the ${paid:.2f} paid for this order."}
+
+        # 5. Max 3 refunds per 90 days (already at 3 -> the 4th is blocked).
+        history = self.get_customer_history(owner)
+        if history["refunds_last_90_days"] >= MAX_REFUNDS_90_DAYS:
+            return {"error": "Customer hit the limit of 3 refunds in 90 days. "
+                             "Do not refund. Use escalate_to_human instead."}
+
         return {"confirmation": f"RF-{uuid.uuid4().hex[:8].upper()}", "order_id": order_id,
                 "amount": round(amount, 2), "method": method}
 
