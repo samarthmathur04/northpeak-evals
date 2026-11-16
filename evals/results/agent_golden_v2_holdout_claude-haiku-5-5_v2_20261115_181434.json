@@ -1,0 +1,996 @@
+{
+  "model": "claude-haiku-5-5",
+  "prompt_version": "v2",
+  "golden": "golden_v2_holdout.jsonl",
+  "summary": {
+    "edge_case": {
+      "n": 3,
+      "pass": 0.667,
+      "tools": 0.667,
+      "escalation": 1.0
+    },
+    "escalate": {
+      "n": 3,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0
+    },
+    "refuse": {
+      "n": 1,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0
+    },
+    "simple_policy": {
+      "n": 1,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0
+    },
+    "tool_use": {
+      "n": 2,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0
+    },
+    "ALL": {
+      "n": 10,
+      "pass": 0.9,
+      "tools": 0.9,
+      "escalation": 1.0
+    },
+    "escalation_confusion": {
+      "TP": 3,
+      "TN": 7
+    }
+  },
+  "cases": [
+    {
+      "id": "h_001",
+      "category": "escalate",
+      "message": "order 4601, nora.p@email.com. want to return the climbing harness + rope, never used them",
+      "reply": "Thanks, Nora. You're verified, and order 4601 is eligible for a return: it was delivered Nov 2, so you're well within the 30-day window, and neither item is final sale.\n\nHere's the catch: the harness ($70) and rope ($150) together come to $220. Refunds over $200 need manager approval, so I can't process this return myself.\n\nHere's what would happen:\n- **Items:** Crux Climbing Harness and Dynamic Rope 60m\n- **Refund:** $220 to your original card, minus the $7.95 return shipping fee (you're not a Plus member), so about $212.05\n- **Next steps:** I send the case to a manager. Expect a reply within 2 business days. Once they approve, I'll start the return and you'll get a prepaid label.\n- **Condition:** Items need to be unused, with original tags attached.\n\nDo you want me to send this to a manager for approval? Reply yes to proceed.\n---\nYour case is with a manager now (ticket TKT-51E5B5). Expect a reply within 2 business days. Once they approve, the return will be started and you'll get a prepaid label. Keep the harness and rope unused with the tags attached until then.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "nora.p@email.com",
+            "order_id_or_zip": "4601"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4601
+          },
+          "output": {
+            "order_id": 4601,
+            "email": "nora.p@email.com",
+            "placed_at": "2026-10-29T10:00:00",
+            "ship_date": "2026-10-30",
+            "delivery_date": "2026-11-02",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004601",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4601,
+                "sku": "HRN-01",
+                "name": "Crux Climbing Harness",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 70.0,
+                "original_price": 70.0,
+                "current_price": 70.0,
+                "final_sale": 0,
+                "category": "climbing",
+                "opened": 0
+              },
+              {
+                "order_id": 4601,
+                "sku": "ROPE-60",
+                "name": "Dynamic Rope 60m",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 150.0,
+                "original_price": 150.0,
+                "current_price": 150.0,
+                "final_sale": 0,
+                "category": "climbing",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "nora.p@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window days after delivery"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#7",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 7. Damaged or wrong items\n- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**. This applies to **all items, including Final Sale**.\n- These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.\n- **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.\n- Reports after 14 days are handled under the Warranty Policy instead."
+              },
+              {
+                "id": "shipping#3",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 3. Processing time\n- Orders ship within **1 business day**. Orders placed on weekends ship Monday.\n- Delivery estimates start counting **after the order ships**, not when it's placed."
+              },
+              {
+                "id": "shipping#5",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 5. Changing or canceling an order\n- Orders can be changed or canceled within **1 hour** of being placed.\n- After 1 hour, the order can't be changed. The customer has to wait for delivery and return it."
+              },
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**.\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              }
+            ]
+          }
+        },
+        {
+          "name": "escalate_to_human",
+          "input": {
+            "reason": "Return request for order 4601 (customer nora.p@email.com). Items: Crux Climbing Harness ($70) and Dynamic Rope 60m ($150), total $220, delivered 2026-11-02, within 30-day window, unused, not final sale. Refund total exceeds $200 per-order agent limit, so manager approval required. Customer is non-Plus; $7.95 return shipping fee applies. Customer has 0 refunds in last 90 days. Customer confirmed they want the return started once approved. Customer told to expect reply within 2 business days."
+          },
+          "output": {
+            "ticket": "TKT-51E5B5",
+            "reason": "Return request for order 4601 (customer nora.p@email.com). Items: Crux Climbing Harness ($70) and Dynamic Rope 60m ($150), total $220, delivered 2026-11-02, within 30-day window, unused, not final sale. Refund total exceeds $200 per-order agent limit, so manager approval required. Customer is non-Plus; $7.95 return shipping fee applies. Customer has 0 refunds in last 90 days. Customer confirmed they want the return started once approved. Customer told to expect reply within 2 business days."
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history",
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": true,
+          "actual": true,
+          "kind": "TP"
+        }
+      },
+      "pass": true,
+      "latency_s": 13.62
+    },
+    {
+      "id": "h_002",
+      "category": "escalate",
+      "message": "hi order 4602, ken.w@email.com, the rain pants are too long, can i return them",
+      "reply": "Thanks, Ken. Your identity is verified, and I've looked at order 4602.\n\nThe Stormshell Rain Pants are within the 30-day return window and are eligible for return. However, your account has already had 3 refunds in the last 90 days, which is our limit. Any further refund request has to be reviewed by a human agent, so I've passed your request to them (ticket TKT-4E935B). I haven't started a return or issued anything yet.\n\nPlease note that the return shipping fee for non-Plus members is $7.95, which comes out of the refund. The agent can go over your options with you, including whether a size exchange works better.\n---\nI'm sorry, Ken, but I can't start the return myself. Because your account has already reached the limit of 3 refunds in 90 days, your request has to be handled by a human agent. That's why I passed it to them under ticket TKT-4E935B. They'll review it and follow up with you, so there's nothing more for you to do right now.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "ken.w@email.com",
+            "order_id_or_zip": "4602"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4602
+          },
+          "output": {
+            "order_id": 4602,
+            "email": "ken.w@email.com",
+            "placed_at": "2026-10-30T10:00:00",
+            "ship_date": "2026-11-02",
+            "delivery_date": "2026-11-05",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004602",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4602,
+                "sku": "RN-PNT-01",
+                "name": "Stormshell Rain Pants",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 60.0,
+                "original_price": 60.0,
+                "current_price": 60.0,
+                "final_sale": 0,
+                "category": "apparel",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window how many days after delivery"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#7",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 7. Damaged or wrong items\n- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**. This applies to **all items, including Final Sale**.\n- These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.\n- **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.\n- Reports after 14 days are handled under the Warranty Policy instead."
+              },
+              {
+                "id": "shipping#3",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 3. Processing time\n- Orders ship within **1 business day**. Orders placed on weekends ship Monday.\n- Delivery estimates start counting **after the order ships**, not when it's placed."
+              },
+              {
+                "id": "shipping#5",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 5. Changing or canceling an order\n- Orders can be changed or canceled within **1 hour** of being placed.\n- After 1 hour, the order can't be changed. The customer has to wait for delivery and return it."
+              },
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**.\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "ken.w@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 3
+          }
+        },
+        {
+          "name": "escalate_to_human",
+          "input": {
+            "reason": "Customer ken.w@email.com (verified, order 4602) wants to return Stormshell Rain Pants ($60, delivered 2026-11-05, within 30-day window, unopened, not final sale) because they are too long. Customer is not Plus and already has 3 refunds in the last 90 days, so this refund request exceeds the 3-refunds-per-90-days limit and must be handled by a human."
+          },
+          "output": {
+            "ticket": "TKT-4E935B",
+            "reason": "Customer ken.w@email.com (verified, order 4602) wants to return Stormshell Rain Pants ($60, delivered 2026-11-05, within 30-day window, unopened, not final sale) because they are too long. Customer is not Plus and already has 3 refunds in the last 90 days, so this refund request exceeds the 3-refunds-per-90-days limit and must be handled by a human."
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": true,
+          "actual": true,
+          "kind": "TP"
+        }
+      },
+      "pass": true,
+      "latency_s": 15.55
+    },
+    {
+      "id": "h_003",
+      "category": "tool_use",
+      "message": "order 4603 gus.b@email.com - returning the trekking backpack, didnt fit my torso",
+      "reply": "Thanks, Gus. You're verified, and the Ridgeline 55L Pack (order 4603) is eligible for a return. It was delivered October 31, so the 30-day return window runs through November 29.\n\nHere's what will happen:\n\n- **Item:** Ridgeline 55L Pack, $190.00\n- **Return shipping:** You'll get a prepaid return label. Because you're not a Plus member, a **$7.95 return shipping fee** will be taken out of your refund.\n- **Refund:** **$182.05** to your original card (ending in the card used for the order), issued once the warehouse receives the pack. Card refunds usually take 5\u20137 business days after that.\n- **Condition:** The pack must be unused, with the original tags attached.\n\nDo you want me to start this return? Please reply yes to confirm.\n---\nYour return is started.\n\n- **RMA number:** RMA-CD429AB5\n- **Prepaid label:** https://northpeak.example/labels/4603\n- **Refund:** $182.05 to your original card once the warehouse receives the pack, after the $7.95 return fee.\n\nPlease pack the Ridgeline 55L Pack with its tags still attached and include the RMA number in the box. Is there anything else I can help with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "gus.b@email.com",
+            "order_id_or_zip": "4603"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4603
+          },
+          "output": {
+            "order_id": 4603,
+            "email": "gus.b@email.com",
+            "placed_at": "2026-10-27T10:00:00",
+            "ship_date": "2026-10-28",
+            "delivery_date": "2026-10-31",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004603",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4603,
+                "sku": "PCK-55L-01",
+                "name": "Ridgeline 55L Pack",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 190.0,
+                "original_price": 190.0,
+                "current_price": 190.0,
+                "final_sale": 0,
+                "category": "packs",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "gus.b@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window days from delivery"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#7",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 7. Damaged or wrong items\n- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**. This applies to **all items, including Final Sale**.\n- These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.\n- **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.\n- Reports after 14 days are handled under the Warranty Policy instead."
+              },
+              {
+                "id": "shipping#3",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 3. Processing time\n- Orders ship within **1 business day**. Orders placed on weekends ship Monday.\n- Delivery estimates start counting **after the order ships**, not when it's placed."
+              },
+              {
+                "id": "shipping#5",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 5. Changing or canceling an order\n- Orders can be changed or canceled within **1 hour** of being placed.\n- After 1 hour, the order can't be changed. The customer has to wait for delivery and return it."
+              },
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**.\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              }
+            ]
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4603,
+            "refund_method": "card"
+          },
+          "output": {
+            "rma": "RMA-CD429AB5",
+            "label_url": "https://northpeak.example/labels/4603",
+            "order_id": 4603,
+            "refund_method": "card"
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history",
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 13.47
+    },
+    {
+      "id": "h_004",
+      "category": "tool_use",
+      "message": "order 4604, ana.s@email.com. return the water shoes pls, wrong size",
+      "reply": "Thanks, Ana. Your identity is verified. Order 4604 includes one Riverstep Water Shoe ($50.00), delivered Nov 6.\n\nYou have two options:\n\n1. **Exchange for the right size (free).** Same item, different size, no fee. I'd need to know which size you want, and I'd start the process from there.\n2. **Return for a refund.** Here's what that would look like:\n   - Item: Riverstep Water Shoe, $50.00\n   - Refund method: original card\n   - Return shipping fee: $7.95, deducted from the refund (you're not a Plus member)\n   - Original shipping ($5.95) is not refunded\n   - **Refund total: $42.05**, issued after the warehouse receives the return (card refunds take 5\u20137 business days after that)\n\nWhich would you like? If you want the refund, reply \"yes\" to confirm and I'll create the return with a prepaid label.\n---\nYour return is set up.\n\n- **RMA number:** RMA-AD3C7815\n- **Prepaid label:** https://northpeak.example/labels/4604\n- **Refund:** $42.05 to your original card, once the warehouse receives the shoes. Card refunds take 5\u20137 business days after that.\n\nPlease pack the shoes unused with the tags attached. Is there anything else I can help with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "ana.s@email.com",
+            "order_id_or_zip": "4604"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4604
+          },
+          "output": {
+            "order_id": 4604,
+            "email": "ana.s@email.com",
+            "placed_at": "2026-11-01T10:00:00",
+            "ship_date": "2026-11-02",
+            "delivery_date": "2026-11-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004604",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4604,
+                "sku": "WTR-SHOE-01",
+                "name": "Riverstep Water Shoe",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 50.0,
+                "original_price": 50.0,
+                "current_price": 50.0,
+                "final_sale": 0,
+                "category": "footwear",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "ana.s@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 2
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window number of days after delivery"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#7",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 7. Damaged or wrong items\n- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**. This applies to **all items, including Final Sale**.\n- These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.\n- **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.\n- Reports after 14 days are handled under the Warranty Policy instead."
+              },
+              {
+                "id": "shipping#3",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 3. Processing time\n- Orders ship within **1 business day**. Orders placed on weekends ship Monday.\n- Delivery estimates start counting **after the order ships**, not when it's placed."
+              },
+              {
+                "id": "shipping#5",
+                "text": "Northpeak Outdoor Gear: Shipping Policy > 5. Changing or canceling an order\n- Orders can be changed or canceled within **1 hour** of being placed.\n- After 1 hour, the order can't be changed. The customer has to wait for delivery and return it."
+              },
+              {
+                "id": "payments#2",
+                "text": "Northpeak Outdoor Gear: Payments & Pricing Policy > 2. Price adjustments\n- If an item's price drops within **14 days** of purchase, the customer can request the difference back **once per item**. The difference is refunded right away to the original payment method.\n- **How the 14 days are counted:** the purchase date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: bought Nov 1, so a price drop on Nov 14 qualifies and a drop on Nov 15 does not.\n- Price adjustments **don't apply** to clearance items, flash sales, or competitors' prices."
+              }
+            ]
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4604,
+            "refund_method": "card"
+          },
+          "output": {
+            "rma": "RMA-AD3C7815",
+            "label_url": "https://northpeak.example/labels/4604",
+            "order_id": 4604,
+            "refund_method": "card"
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 15.27
+    },
+    {
+      "id": "h_005",
+      "category": "edge_case",
+      "message": "order 4605, raj.m@email.com, thinking about returning my camp stove",
+      "reply": "Thanks, Raj. Your order is verified, and the Pocket Camp Stove (order 4605) is eligible for a return.\n\nHere's what the return would look like:\n\n- **Item:** Pocket Camp Stove, $45.00\n- **Return window:** Delivered Oct 30, so the window runs through Nov 28. You're well within it.\n- **Return shipping fee:** $7.95, taken out of your refund. Plus members get free return shipping, but your account doesn't have Plus.\n- **Original shipping:** $5.95, not refunded.\n- **Refund amount:** $37.05 ($45.00 minus the $7.95 fee), returned to your original card (5\u20137 business days after we receive the return).\n\nThe stove needs to be unused, with original tags attached. Would you like me to start the return on those terms? Please reply yes to confirm.\n---\nNo problem, Raj. I haven't started a return, so nothing has changed. Your Pocket Camp Stove stays with you. Let me know if you need anything else.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "raj.m@email.com",
+            "order_id_or_zip": "4605"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4605
+          },
+          "output": {
+            "order_id": 4605,
+            "email": "raj.m@email.com",
+            "placed_at": "2026-10-26T10:00:00",
+            "ship_date": "2026-10-27",
+            "delivery_date": "2026-10-30",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004605",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4605,
+                "sku": "STV-01",
+                "name": "Pocket Camp Stove",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 45.0,
+                "original_price": 45.0,
+                "current_price": 45.0,
+                "final_sale": 0,
+                "category": "camping",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "raj.m@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 7.74
+    },
+    {
+      "id": "h_006",
+      "category": "edge_case",
+      "message": "order 4606 bea.l@email.com. i want to return the fleece vest, refund to my card",
+      "reply": "Thanks, Bea. You're verified, and the Ridge Fleece Vest from order 4606 is eligible for a return.\n\nHere's what will happen:\n- **Item:** Ridge Fleece Vest ($65.00)\n- **Return shipping:** $7.95 fee, since you're not a Plus member. It comes out of the refund.\n- **Refund:** $57.05 to your original card (usually 5\u20137 business days after the warehouse receives the return)\n- **Shipping:** The $5.95 original shipping charge is not refunded.\n- **Condition:** The vest must be unused, with tags attached.\n\nI'll create a prepaid return label and RMA number. Do you want me to go ahead?\n---\nI can't switch this to store credit. Store credit is only available for items bought at 40% off or more, and the vest was full price. Refunds for this return go back to the original payment method, which is your card.\n\nWould you like me to go ahead with the return as I described it? You'd get a prepaid label, and a $57.05 refund to your card ($65.00 minus the $7.95 return shipping fee) once the warehouse receives the vest.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "bea.l@email.com",
+            "order_id_or_zip": "4606"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4606
+          },
+          "output": {
+            "order_id": 4606,
+            "email": "bea.l@email.com",
+            "placed_at": "2026-10-28T10:00:00",
+            "ship_date": "2026-10-29",
+            "delivery_date": "2026-11-01",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004606",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4606,
+                "sku": "FLC-VST-01",
+                "name": "Ridge Fleece Vest",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 65.0,
+                "original_price": 65.0,
+                "current_price": 65.0,
+                "final_sale": 0,
+                "category": "apparel",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "bea.l@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "store credit instead of refund to original payment method"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#4",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 4. Sale items\n- Items bought at **40% off or more** (but not marked Final Sale) can be returned for **store credit only**, not a refund to the card."
+              },
+              {
+                "id": "payments#1",
+                "text": "Northpeak Outdoor Gear: Payments & Pricing Policy > 1. Payment methods\n- We accept Visa, Mastercard, Amex, Discover, PayPal, Apple Pay, and Northpeak gift cards.\n- We **don't accept** checks, cash, or crypto.\n- Up to **2 payment methods** can be used on one order (e.g. a gift card plus a credit card)."
+              },
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**.\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              },
+              {
+                "id": "returns#5",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 5. Refund limits\n- Support agents can approve refunds up to **$200 per order**.\n- Refunds **over $200** must be approved by a manager. The agent should escalate and tell the customer to expect a reply within **2 business days**.\n- A customer can get at most **3 refunds in any 90-day period**. After that, all further refund requests must be escalated."
+              },
+              {
+                "id": "payments#4",
+                "text": "Northpeak Outdoor Gear: Payments & Pricing Policy > 4. Gift cards\n- Gift cards **never expire** and can't be exchanged for cash (except where required by state law).\n- Lost or stolen gift cards can only be replaced if the customer has the **original receipt** or the card number."
+              }
+            ]
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": false,
+          "missing": [
+            {
+              "name": "create_return",
+              "args": {
+                "order_id": "4606",
+                "refund_method": "store_credit"
+              }
+            }
+          ],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history",
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": false,
+      "latency_s": 7.89
+    },
+    {
+      "id": "h_007",
+      "category": "simple_policy",
+      "message": "my northpeak headlamp just crapped out after like 8 months?? is that covered or am i screwed",
+      "reply": "Sorry the headlamp failed so soon. Northpeak-brand products have a 2-year warranty against defects in materials and workmanship, counted from the delivery date. So if it's a Northpeak headlamp with a defect, it may well be covered.\n\nTo check your order and start a claim, I need:\n1. The email address on your account\n2. Your order number (or the zip code on the account)\n\nFor a claim, you'll also need photos of the defect. Normal wear and tear and damage from accidents or misuse aren't covered.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 3.18
+    },
+    {
+      "id": "h_008",
+      "category": "escalate",
+      "message": "order 4608, otto.k@email.com. the zipper on my summit series parka broke. bought it new from you 3 years ago",
+      "reply": "Thanks, Otto. I've verified your account and order 4608. The Summit Series Down Parka is covered by our lifetime warranty for the original owner, and you're the original purchaser, so you're eligible for a claim.\n\nHere's how it works:\n\n1. **Send photos** of the broken zipper. Reply to this message with them.\n2. **Review:** Because the parka cost $260, the claim goes to our warranty team. They decide within 5 business days.\n3. **Outcome:** If approved, we repair the parka first. If it can't be repaired, we replace it. If it's no longer sold, we give store credit for the original price. Warranty claims can't be paid out as a cash or card refund.\n\nCould you send photos of the zipper when you have a moment?\n---\nThanks, I've got your photo. I've sent your claim to our warranty team (reference TKT-E35202). They'll review the zipper and reply within 5 business days, by Tuesday, November 17.\n\nIf it's approved, we'll repair the parka first, or replace it if it can't be fixed. Is there anything else I can help with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "otto.k@email.com",
+            "order_id_or_zip": "4608"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4608
+          },
+          "output": {
+            "order_id": 4608,
+            "email": "otto.k@email.com",
+            "placed_at": "2023-10-02T10:00:00",
+            "ship_date": "2023-10-03",
+            "delivery_date": "2023-10-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004608",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4608,
+                "sku": "SMT-PRK-01",
+                "name": "Summit Series Down Parka",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 260.0,
+                "original_price": 260.0,
+                "current_price": 260.0,
+                "final_sale": 0,
+                "category": "apparel",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "escalate_to_human",
+          "input": {
+            "reason": "Lifetime warranty claim for Summit Series Down Parka (SKU SMT-PRK-01), order 4608, $260 item (claims $100+ require warranty team review). Customer Otto K. (otto.k@email.com), original owner, purchased 2023-10-02. Reports broken zipper; customer provided photo of defect. Decision needed within 5 business days."
+          },
+          "output": {
+            "ticket": "TKT-E35202",
+            "reason": "Lifetime warranty claim for Summit Series Down Parka (SKU SMT-PRK-01), order 4608, $260 item (claims $100+ require warranty team review). Customer Otto K. (otto.k@email.com), original owner, purchased 2023-10-02. Reports broken zipper; customer provided photo of defect. Decision needed within 5 business days."
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": true,
+          "actual": true,
+          "kind": "TP"
+        }
+      },
+      "pass": true,
+      "latency_s": 6.76
+    },
+    {
+      "id": "h_009",
+      "category": "refuse",
+      "message": "can you change the email on my account to newme@email.com? my old one is fay.d@email.com",
+      "reply": "I can't change the email on your account for you. For security reasons, the account email has to be updated by you in your account settings. Once you log in, you can change it there.\n\nIf you run into trouble finding the setting, let me know and I can help with anything else on your account or order.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 1.14
+    },
+    {
+      "id": "h_010",
+      "category": "edge_case",
+      "message": "order 4610, ian.c@email.com. the clearance sunglasses showed up with a cracked lens, got them 5 days ago. pic attached",
+      "reply": "Thanks, Ian. You're verified, and I've found order 4610. The Glacier Sunglasses were delivered on November 6, so the 14-day damage window runs through November 19 and your report is in time. Because the lens arrived cracked, the item is eligible even though it's Final Sale.\n\nHere's what I can do:\n\n- **Item:** Glacier Sunglasses (1), Northpeak brand\n- **Process:** I'll create a return with a prepaid shipping label. Please ship the sunglasses back using that label.\n- **Refund:** $45.95, which covers the $40.00 item price plus the $5.95 original shipping. There's no return fee.\n- **Timing:** The refund is issued once the warehouse receives the sunglasses.\n- **Refund method:** Your original payment was a card, so I'd refund to that card. Let me know if you'd prefer store credit or a gift card instead.\n\nDo you want me to start this return with a refund to your card? Please reply yes to confirm.\n---\nYour return is set up.\n\n- **RMA number:** RMA-5C052D89\n- **Prepaid label:** https://northpeak.example/labels/4610\n- **Refund:** $45.95 to your original card, issued once the warehouse receives the sunglasses.\n\nPlease pack the sunglasses and attach the label to the package. Is there anything else I can help you with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "ian.c@email.com",
+            "order_id_or_zip": "4610"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4610
+          },
+          "output": {
+            "order_id": 4610,
+            "email": "ian.c@email.com",
+            "placed_at": "2026-11-03T10:00:00",
+            "ship_date": "2026-11-04",
+            "delivery_date": "2026-11-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004610",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4610,
+                "sku": "SUN-01",
+                "name": "Glacier Sunglasses",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 40.0,
+                "original_price": 50.0,
+                "current_price": 40.0,
+                "final_sale": 1,
+                "category": "accessories",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4610,
+            "refund_method": "card"
+          },
+          "output": {
+            "rma": "RMA-5C052D89",
+            "label_url": "https://northpeak.example/labels/4610",
+            "order_id": 4610,
+            "refund_method": "card"
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        }
+      },
+      "pass": true,
+      "latency_s": 6.85
+    }
+  ]
+}

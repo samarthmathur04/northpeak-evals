@@ -17,7 +17,6 @@ from app.agent import MODEL, run_agent
 from app.prompts import PROMPT_VERSION
 from evals.graders.code_graders import grade_escalation, grade_tool_calls
 
-GOLDEN = Path("evals/golden_v1.jsonl")
 RESULTS = Path("evals/results")
 
 
@@ -65,9 +64,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", nargs="*")
     ap.add_argument("--category")
+    ap.add_argument("--golden", default="evals/golden_v1.jsonl")
     ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args()
 
+    GOLDEN = Path(args.golden)
     cases = [json.loads(l) for l in GOLDEN.read_text().splitlines() if l.strip()]
     if args.ids:
         cases = [c for c in cases if c["id"] in args.ids]
@@ -86,7 +87,7 @@ def main():
     print("\nFAILED:", ", ".join(r["id"] for r in rows if not r["pass"]) or "none")
 
     RESULTS.mkdir(exist_ok=True)
-    out = RESULTS / f"agent_{MODEL}_{PROMPT_VERSION}_{datetime.now():%Y%m%d_%H%M%S}.json"
+    out = RESULTS / f"agent_{GOLDEN.stem}_{MODEL}_{PROMPT_VERSION}_{datetime.now():%Y%m%d_%H%M%S}.json"
     out.write_text(json.dumps({"model": MODEL, "prompt_version": PROMPT_VERSION,
                                "golden": GOLDEN.name, "summary": summary, "cases": rows},
                               indent=2, default=str))

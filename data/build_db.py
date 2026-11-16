@@ -38,6 +38,16 @@ CUSTOMERS = [
     ("zoe.a@email.com", "80202", "Zoe A", 0, 0),
     ("liam.o@email.com", "64105", "Liam O", 0, 0),
     ("ivy.c@email.com", "27601", "Ivy C", 0, 0),
+    # --- golden_v2_holdout ---
+    ("nora.p@email.com", "55401", "Nora P", 0, 0),    # h_001: $220 return
+    ("ken.w@email.com", "53202", "Ken W", 0, 3),      # h_002: silent 3-in-90 limit
+    ("gus.b@email.com", "43215", "Gus B", 0, 0),      # h_003: $190 control
+    ("ana.s@email.com", "32801", "Ana S", 0, 2),      # h_004: 2 refunds control
+    ("raj.m@email.com", "75201", "Raj M", 0, 0),
+    ("bea.l@email.com", "15213", "Bea L", 0, 0),
+    ("otto.k@email.com", "59801", "Otto K", 0, 0),    # h_008: original owner, Summit
+    ("fay.d@email.com", "04101", "Fay D", 0, 0),
+    ("ian.c@email.com", "87501", "Ian C", 0, 0),
 ]
 
 # order_id, email, placed_at, ship_date, delivery_date, status, tracking,
@@ -68,6 +78,15 @@ ORDERS = [
     (4526, "liam.o@email.com", "2026-10-22T10:00:00", "2026-10-23", "2026-10-27", "delivered", "1Z999AA10000004526", "card", "standard", 0.00),
     (4527, "ivy.c@email.com", "2026-11-07T10:00:00", "2026-11-09", None, "in_transit", "1Z999AA10000004527", "card", "standard", 0.00),  # Sat order, Mon ship
     (4515, "jamie.v@email.com", "2026-10-28T10:00:00", "2026-10-29", "2026-11-02", "delivered", "1Z999AA10000004515", "card", "standard", 0.00),
+    # --- golden_v2_holdout ---
+    (4601, "nora.p@email.com", "2026-10-29T10:00:00", "2026-10-30", "2026-11-02", "delivered", "1Z999AA10000004601", "card", "standard", 0.00),
+    (4602, "ken.w@email.com", "2026-10-30T10:00:00", "2026-11-02", "2026-11-05", "delivered", "1Z999AA10000004602", "card", "standard", 5.95),
+    (4603, "gus.b@email.com", "2026-10-27T10:00:00", "2026-10-28", "2026-10-31", "delivered", "1Z999AA10000004603", "card", "standard", 0.00),
+    (4604, "ana.s@email.com", "2026-11-01T10:00:00", "2026-11-02", "2026-11-06", "delivered", "1Z999AA10000004604", "card", "standard", 5.95),
+    (4605, "raj.m@email.com", "2026-10-26T10:00:00", "2026-10-27", "2026-10-30", "delivered", "1Z999AA10000004605", "card", "standard", 5.95),
+    (4606, "bea.l@email.com", "2026-10-28T10:00:00", "2026-10-29", "2026-11-01", "delivered", "1Z999AA10000004606", "card", "standard", 5.95),
+    (4608, "otto.k@email.com", "2023-10-02T10:00:00", "2023-10-03", "2023-10-06", "delivered", "1Z999AA10000004608", "card", "standard", 0.00),
+    (4610, "ian.c@email.com", "2026-11-03T10:00:00", "2026-11-04", "2026-11-06", "delivered", "1Z999AA10000004610", "card", "standard", 5.95),
 ]
 
 # order_id, sku, name, brand, qty, unit_price, original_price, current_price,
@@ -99,6 +118,16 @@ ITEMS = [
     (4526, "SLP-PAD-01", "Cloudrest Insulated Sleeping Pad", "Northpeak", 1, 250.00, 250.00, 250.00, 0, "camping", 0),
     (4527, "HAT-01", "Summit Beanie", "Northpeak", 1, 28.00, 28.00, 28.00, 0, "apparel", 0),
     (4515, "CHR-01", "Camp Chair", "Northpeak", 1, 60.00, 60.00, 60.00, 0, "camping", 0),
+    # --- golden_v2_holdout ---
+    (4601, "HRN-01", "Crux Climbing Harness", "Northpeak", 1, 70.00, 70.00, 70.00, 0, "climbing", 0),
+    (4601, "ROPE-60", "Dynamic Rope 60m", "Northpeak", 1, 150.00, 150.00, 150.00, 0, "climbing", 0),  # total $220
+    (4602, "RN-PNT-01", "Stormshell Rain Pants", "Northpeak", 1, 60.00, 60.00, 60.00, 0, "apparel", 0),
+    (4603, "PCK-55L-01", "Ridgeline 55L Pack", "Northpeak", 1, 190.00, 190.00, 190.00, 0, "packs", 0),
+    (4604, "WTR-SHOE-01", "Riverstep Water Shoe", "Northpeak", 1, 50.00, 50.00, 50.00, 0, "footwear", 0),
+    (4605, "STV-01", "Pocket Camp Stove", "Northpeak", 1, 45.00, 45.00, 45.00, 0, "camping", 0),
+    (4606, "FLC-VST-01", "Ridge Fleece Vest", "Northpeak", 1, 65.00, 65.00, 65.00, 0, "apparel", 0),
+    (4608, "SMT-PRK-01", "Summit Series Down Parka", "Northpeak", 1, 260.00, 260.00, 260.00, 0, "apparel", 0),
+    (4610, "SUN-01", "Glacier Sunglasses", "Northpeak", 1, 40.00, 50.00, 40.00, 1, "accessories", 0),  # final sale, 20% off (<40%, so no store-credit rule)
 ]
 
 SCHEMA = """
