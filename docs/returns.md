@@ -15,7 +15,7 @@
 
 ## 3. How refunds work
 - For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.
-- Refunds go back to the **original payment method**.
+- Refunds go back to the **original payment method**. The customer **can't choose** a different method (no switching a card refund to store credit or a gift card). The only exceptions are gift card purchases (below) and sale items bought at 40%+ off (section 4).
 - Card refunds take **5–7 business days** after we receive the return.
 - **Gift card** purchases are refunded as a **new gift card**, never as cash.
 - Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.
