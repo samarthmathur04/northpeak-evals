@@ -39,13 +39,13 @@ def build_index(docs_dir: str = "docs") -> tuple[list[dict], np.ndarray]:
 
 
 def load_index() -> tuple[list[dict], np.ndarray]:
-    """Load the cached index, rebuilding it if missing or built with another model."""
+    """Load the cached index, rebuilding it if missing, built with another model, or docs changed."""
     meta_path = CACHE_DIR / "chunks.json"
     if not meta_path.exists():
         return build_index()
     meta = json.loads(meta_path.read_text())
-    if meta["model"] != MODEL_NAME:
-        return build_index()
+    if meta["model"] != MODEL_NAME or meta["chunks"] != chunk_docs("docs"):
+        return build_index()  # stale cache = agent retrieves old policy text, silently
     return meta["chunks"], np.load(CACHE_DIR / "chunks.npy")
 
 

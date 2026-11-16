@@ -77,7 +77,9 @@ class Session:
         return {**dict(o), "items": [dict(i) for i in items]}
 
     def get_customer_history(self, email: str) -> dict:
-        # TODO (Samarth): same verification guard as lookup_order?  Decide + justify.
+        # GUARD: membership + refund history is account data -> verified customers only.
+        if email.strip().lower() not in self.verified_emails:
+            return {"error": "Verify the customer before looking up their account."}
         with _db() as con:
             c = con.execute(
                 "SELECT is_plus_member, refunds_last_90_days FROM customers WHERE lower(email) = ?",
@@ -128,14 +130,26 @@ class Session:
         return refund
 
     def create_return(self, order_id: int, refund_method: str) -> dict:
-        # TODO (Samarth): GUARDS. verified? method valid?
-        #   Should final_sale be blocked HERE in code, or left to the model + policy? Argue it.
+        # HARD GUARDS only. Final sale is NOT blocked here: damaged/wrong final-sale
+        # items CAN be returned (returns.md s.2 + s.7), so it's a policy judgment for the model.
+        owner = _order_email(order_id)
+        if owner is None or owner.lower() not in self.verified_emails:
+            return {"error": "Can't act on this order. Verify the customer first."}
+        if refund_method not in REFUND_METHODS:
+            return {"error": f"Invalid method '{refund_method}'. Use one of: {sorted(REFUND_METHODS)}."}
         return {"rma": f"RMA-{uuid.uuid4().hex[:8].upper()}", "label_url": f"https://northpeak.example/labels/{order_id}",
                 "order_id": order_id, "refund_method": refund_method}
 
     def cancel_order(self, order_id: int) -> dict:
-        # TODO (Samarth): GUARDS. verified? placed within CANCEL_WINDOW of now()?
-        #   Hint: datetime.fromisoformat(order["placed_at"])
+        # HARD GUARDS: verified owner, and within 1 hour of placement (always true -> code).
+        owner = _order_email(order_id)
+        if owner is None or owner.lower() not in self.verified_emails:
+            return {"error": "Can't act on this order. Verify the customer first."}
+        with _db() as con:
+            placed = con.execute("SELECT placed_at FROM orders WHERE order_id = ?", (order_id,)).fetchone()[0]
+        if now() - datetime.fromisoformat(placed) > CANCEL_WINDOW:
+            return {"error": "Orders can only be cancelled within 1 hour of placement. "
+                             "Offer a return once it arrives instead."}
         return {"success": True, "order_id": order_id}
 
     def escalate_to_human(self, reason: str) -> dict:

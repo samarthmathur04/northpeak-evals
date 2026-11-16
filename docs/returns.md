@@ -8,7 +8,7 @@
 - Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later.
 
 ## 2. Items that can't be returned
-- **Final sale** items (marked "Final Sale" on the product page).
+- **Final sale** items (marked "Final Sale" on the product page), unless they arrived **damaged or wrong** (see section 7).
 - **Personalized** items (custom embroidery, engraving).
 - **Opened consumables**: fuel canisters, food, sunscreen, bug spray.
 - **Used gear** can't be returned, unless it's defective (see the Warranty Policy).
@@ -35,7 +35,7 @@
 - Final sale items **can't be exchanged**.
 
 ## 7. Damaged or wrong items
-- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**.
+- Report damaged or wrong items within **14 days of delivery**, with at least **one photo**. This applies to **all items, including Final Sale**.
 - These get a full refund **including original shipping**, and no return fee. Like any return, the item must be **shipped back first** (free prepaid label). The refund is issued once the warehouse receives it.
 - **How the 14 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 14**. Example: delivered Nov 1, so report by Nov 14.
 - Reports after 14 days are handled under the Warranty Policy instead.
