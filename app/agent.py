@@ -1,0 +1,87 @@
+"""The agent: retrieve policy -> call Claude -> run requested tools -> repeat.
+
+Auth: uses your `ant auth login` sign-in (no API key needed).
+"""
+import json
+
+import anthropic
+
+from app.prompts import PROMPT_VERSION, build_system_prompt
+from app.retrieve import retrieve
+from app.tools import Session
+
+MODEL = "claude-haiku-5-5"   # cheapest; recorded with every eval result
+MAX_STEPS = 8                # loop cap: a stuck case fails, it doesn't hang the eval
+
+client = anthropic.Anthropic()
+
+# Tool schemas: what the model SEES. The descriptions are prompts too: be precise.
+TOOLS = [
+    {"name": "verify_customer",
+     "description": "Verify the customer's identity. Required before sharing or acting on any order or account info.",
+     "input_schema": {"type": "object", "properties": {
+         "email": {"type": "string"},
+         "order_id_or_zip": {"type": "string", "description": "An order number or the account's zip code"}},
+         "required": ["email", "order_id_or_zip"]}},
+    {"name": "lookup_order",
+     "description": "Get an order's items, prices, final-sale/discount flags, dates, status, tracking, and payment method.",
+     "input_schema": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}},
+    {"name": "get_customer_history",
+     "description": "Get whether the customer is a Plus member and how many refunds they've had in the last 90 days. "
+                    "Use this instead of trusting what the customer says.",
+     "input_schema": {"type": "object", "properties": {"email": {"type": "string"}}, "required": ["email"]}},
+    {"name": "issue_refund",
+     "description": "Refund money immediately. ONLY for price adjustments. Returns (including damaged items) use create_return.",
+     "input_schema": {"type": "object", "properties": {
+         "order_id": {"type": "integer"}, "amount": {"type": "number"},
+         "method": {"type": "string", "enum": ["card", "gift_card", "store_credit"]}},
+         "required": ["order_id", "amount", "method"]}},
+    {"name": "create_return",
+     "description": "Start a return: creates a prepaid label and RMA number. The refund is issued when the item arrives.",
+     "input_schema": {"type": "object", "properties": {
+         "order_id": {"type": "integer"},
+         "refund_method": {"type": "string", "enum": ["card", "gift_card", "store_credit"]}},
+         "required": ["order_id", "refund_method"]}},
+    {"name": "cancel_order",
+     "description": "Cancel an order. Only possible within 1 hour of placing it.",
+     "input_schema": {"type": "object", "properties": {"order_id": {"type": "integer"}}, "required": ["order_id"]}},
+    {"name": "escalate_to_human",
+     "description": "Hand the case to a human agent. Use when policy requires a manager or specialist, or you can't help.",
+     "input_schema": {"type": "object", "properties": {"reason": {"type": "string"}}, "required": ["reason"]}},
+]
+
+
+def run_agent(message: str) -> dict:
+    """Answer one customer message. Returns everything the graders need."""
+    session = Session()
+    system = build_system_prompt(retrieve(message))
+    messages = [{"role": "user", "content": message}]
+
+    # TODO (Samarth): the loop. Up to MAX_STEPS times:
+    #   1. response = client.messages.create(model=MODEL, max_tokens=1024,
+    #                                        system=system, tools=TOOLS, messages=messages)
+    #   2. Append the model's turn: messages.append({"role": "assistant", "content": response.content})
+    #   3. If response.stop_reason != "tool_use": the model is done -> grab its text, return.
+    #        text = "".join(b.text for b in response.content if b.type == "text")
+    #   4. Otherwise, for EACH block with b.type == "tool_use":
+    #        out = session.run(b.name, b.input)
+    #        collect {"type": "tool_result", "tool_use_id": b.id, "content": json.dumps(out)}
+    #      then messages.append({"role": "user", "content": <all those results>})
+    #   5. If the loop runs out: return with stop="max_steps" (counts as a failure).
+    #
+    # Question to answer before writing: why do tool results go back with role "user"?
+    raise NotImplementedError
+
+
+def _result(text: str, session: Session, stop: str) -> dict:
+    return {"reply": text, "tool_calls": session.calls, "stop": stop,
+            "model": MODEL, "prompt_version": PROMPT_VERSION}
+
+
+if __name__ == "__main__":
+    import sys
+    msg = " ".join(sys.argv[1:]) or "how long does standard shipping take?"
+    r = run_agent(msg)
+    print(r["reply"])
+    for c in r["tool_calls"]:
+        print(" ->", c["name"], c["input"], "=>", c["output"])
