@@ -80,7 +80,23 @@ class Session:
             if o is None:
                 return {"error": f"Order {order_id} not found"}
             items = con.execute("SELECT * FROM order_items WHERE order_id = ?", (order_id,)).fetchall()
-        return {**dict(o), "items": [dict(i) for i in items]}
+        # Policy FACTS computed in code, not left to the model: date math and refund-method
+        # rules are deterministic, and the model kept getting them subtly wrong.
+        out = {**dict(o), "items": []}
+        if o["delivery_date"]:
+            # day 1 = delivery date (returns.md / payments.md day-counting rule)
+            out["delivery_day_number_today"] = (now().date() - datetime.fromisoformat(o["delivery_date"]).date()).days + 1
+        for i in items:
+            item = dict(i)
+            discount = 1 - i["unit_price"] / i["original_price"] if i["original_price"] else 0
+            if o["payment_method"] == "gift_card":
+                item["refund_if_returned"] = "a NEW gift card (not back onto the old card, never cash)"
+            elif discount >= 0.40:
+                item["refund_if_returned"] = "store credit only (bought at 40%+ off)"
+            else:
+                item["refund_if_returned"] = f"original payment method ({o['payment_method']})"
+            out["items"].append(item)
+        return out
 
     def get_customer_history(self, email: str) -> dict:
         # GUARD: membership + refund history is account data -> verified customers only.
@@ -184,7 +200,22 @@ class Session:
         return {"success": True, "order_id": order_id}
 
     def escalate_to_human(self, reason: str) -> dict:
-        return {"ticket": f"TKT-{uuid.uuid4().hex[:6].upper()}", "reason": reason}
+        # Reply-time SLA comes from the docs (returns.md s.5, warranty.md s.3). Returning it here
+        # means the agent always has it, even when that policy chunk wasn't retrieved.
+        # Only SLAs the docs actually state; otherwise none (don't invent a promise).
+        r = reason.lower()
+        if "warrant" in r:
+            sla = "decision within 5 business days"
+        elif "delet" in r or "privacy" in r:
+            sla = "deletion completed within 30 days"
+        elif any(w in r for w in ("refund", "return", "$", "manager", "limit")):
+            sla = "reply within 2 business days"
+        else:
+            sla = None
+        out = {"ticket": f"TKT-{uuid.uuid4().hex[:6].upper()}", "reason": reason}
+        if sla:
+            out["tell_customer"] = sla
+        return out
 
     # ---------- dispatcher (the agent loop calls this) ----------
 

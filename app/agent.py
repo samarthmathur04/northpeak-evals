@@ -48,7 +48,7 @@ TOOLS = [
          "order_id": {"type": "integer"},
          "refund_method": {"type": "string", "enum": ["card", "gift_card", "store_credit"],
                            "description": "Set by policy, NOT chosen by the customer: the original payment method, "
-                                          "except gift_card for gift card purchases and store_credit for items bought at 40%+ off. "
+                                          "except gift_card for gift card purchases (refunded as a NEW gift card; tell the customer that) and store_credit for items bought at 40%+ off. "
                                           "Never ask the customer which method they want."},
          "items": {"type": "array", "description": "Optional. Items to return, e.g. [{\"sku\": \"FUEL-230\", \"qty\": 3}].",
                    "items": {"type": "object", "properties": {"sku": {"type": "string"}, "qty": {"type": "integer"}},

@@ -1,0 +1,718 @@
+{
+  "model": "claude-haiku-5-5",
+  "prompt_version": "v3",
+  "judge": "claude-sonnet-5-5/j1",
+  "golden": "golden_v1.jsonl",
+  "summary": {
+    "edge_case": {
+      "n": 2,
+      "pass": 0.5,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 0.5
+    },
+    "escalate": {
+      "n": 1,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 1.0
+    },
+    "tool_use": {
+      "n": 2,
+      "pass": 0.5,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 0.5
+    },
+    "ALL": {
+      "n": 5,
+      "pass": 0.6,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 0.6
+    },
+    "escalation_confusion": {
+      "TN": 4,
+      "TP": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "tool_003",
+      "category": "tool_use",
+      "message": "hi, order #4503, maya.r@email.com - the hiking boots don't fit, I want to return them. got them 2 weeks ago, never worn outside",
+      "reply": "Thanks, Maya. Your identity is verified, and order #4503 is eligible for a return.\n\n**Return details:**\n- **Item:** Granite Hiking Boot (Northpeak, SKU HK-BOOT-03), qty 1\n- **Refund amount:** $145.00 item price, minus a **$7.95 return shipping fee** (you're not a Plus member), for a **net refund of $137.05**\n- **Refund method:** Original payment method (card). Card refunds take 5\u20137 business days after the warehouse receives the return.\n- **Return window:** Your order was delivered Oct 27, and the 30-day window runs through Nov 25, so you're within it.\n\nThe boots need to be unused and have their original tags attached. I'll start the return and email you a prepaid label, with the $7.95 fee deducted from your refund.\n\nDo you want me to start this return? Please reply yes to confirm.\n---\nYour return is started.\n\n- **RMA number:** RMA-0B38EAEA\n- **Prepaid label:** https://northpeak.example/labels/4503\n- **Refund:** $137.05 to your original card ($145.00 minus the $7.95 return fee), issued once the warehouse receives the boots. Card refunds take 5\u20137 business days after that.\n\nPlease pack the boots with their tags attached and ship them back using the label. Is there anything else I can help you with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "maya.r@email.com",
+            "order_id_or_zip": "4503"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4503
+          },
+          "output": {
+            "order_id": 4503,
+            "email": "maya.r@email.com",
+            "placed_at": "2026-10-23T10:00:00",
+            "ship_date": "2026-10-26",
+            "delivery_date": "2026-10-27",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004503",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4503,
+                "sku": "HK-BOOT-03",
+                "name": "Granite Hiking Boot",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 145.0,
+                "original_price": 145.0,
+                "current_price": 145.0,
+                "final_sale": 0,
+                "category": "footwear",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "maya.r@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window return fee non-Plus members"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**. The customer **can't choose** a different method (no switching a card refund to store credit or a gift card). The only exceptions are gift card purchases (below) and sale items bought at 40%+ off (section 4).\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              },
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#5",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 5. Refund limits\n- Support agents can approve refunds up to **$200 per order**.\n- Refunds **over $200** must be approved by a manager. The agent should escalate and tell the customer to expect a reply within **2 business days**.\n- A customer can get at most **3 refunds in any 90-day period**. After that, all further refund requests must be escalated."
+              },
+              {
+                "id": "returns#4",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 4. Sale items\n- Items bought at **40% off or more** (but not marked Final Sale) can be returned for **store credit only**, not a refund to the card."
+              },
+              {
+                "id": "returns#6",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 6. Exchanges\n- Size or color exchanges for the **same item** are free within the return window.\n- Exchanges for a **different item** are handled as a return plus a new order.\n- Final sale items **can't be exchanged**."
+              }
+            ]
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4503,
+            "refund_method": "card",
+            "items": [
+              {
+                "sku": "HK-BOOT-03",
+                "qty": 1
+              }
+            ]
+          },
+          "output": {
+            "rma": "RMA-0B38EAEA",
+            "label_url": "https://northpeak.example/labels/4503",
+            "order_id": 4503,
+            "refund_method": "card",
+            "items": [
+              {
+                "sku": "HK-BOOT-03",
+                "qty": 1
+              }
+            ],
+            "value": 145.0
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        },
+        "judge": {
+          "pass": true,
+          "items": [
+            {
+              "item": "eligible for return",
+              "type": "must_say",
+              "evidence": "Thanks, Maya. Your identity is verified, and order #4503 is eligible for a return.",
+              "reasoning": "The reply explicitly states the order is eligible for return.",
+              "verdict": "pass"
+            },
+            {
+              "item": "$7.95 return shipping fee deducted",
+              "type": "must_say",
+              "evidence": "minus a **$7.95 return shipping fee** (you're not a Plus member), for a **net refund of $137.05**",
+              "reasoning": "The reply clearly says $7.95 return shipping fee is deducted from the refund.",
+              "verdict": "pass"
+            },
+            {
+              "item": "free return shipping",
+              "type": "must_not_say",
+              "evidence": "I'll start the return and email you a prepaid label, with the $7.95 fee deducted from your refund.",
+              "reasoning": "A prepaid label is provided but the reply clearly says the fee is deducted, so it never claims return shipping is free.",
+              "verdict": "pass"
+            },
+            {
+              "item": "could exchange for a different size for free",
+              "type": "nice_to_have",
+              "evidence": "none",
+              "reasoning": "The reply never mentions an exchange option or a free size exchange.",
+              "verdict": "fail"
+            }
+          ],
+          "failed": [],
+          "nice_to_have_rate": 0.0
+        }
+      },
+      "pass": true,
+      "latency_s": 13.67
+    },
+    {
+      "id": "tool_005",
+      "category": "tool_use",
+      "message": "order 4505, lee.w@email.com. want to return the backpack, i paid with a gift card",
+      "reply": "Thanks, Lee. Your account is verified, and order 4505 is eligible for a return.\n\n- **Item:** Daytripper 30L Pack (SKU PCK-30L-01), qty 1\n- **Delivered:** Oct 30, 2026, so you're inside the 30-day return window, which runs through Nov 28.\n- **Return shipping fee:** $7.95. You're not a Plus member, so this comes out of your refund.\n- **Refund amount:** $81.05 ($89.00 minus the $7.95 fee). Original shipping isn't refunded.\n- **Refund method:** Back to your original payment method, the gift card you paid with. The refund is issued once the warehouse receives the pack, usually 5\u20137 business days after that.\n\nThe pack needs to be unused, with the original tags attached. Can you confirm that it is? If so, reply \"yes\" and I'll start the return and send you a prepaid label.\n---\nYour return is started.\n\n- **RMA number:** RMA-65342367\n- **Prepaid label:** https://northpeak.example/labels/4505\n- **Refund:** $81.05 ($89.00 minus the $7.95 return fee), back to your original payment method, the gift card. It's issued once the warehouse receives the pack, usually 5\u20137 business days after that.\n\nPack it with the tags attached and drop it off with the label. Is there anything else I can help with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "lee.w@email.com",
+            "order_id_or_zip": "4505"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4505
+          },
+          "output": {
+            "order_id": 4505,
+            "email": "lee.w@email.com",
+            "placed_at": "2026-10-25T10:00:00",
+            "ship_date": "2026-10-26",
+            "delivery_date": "2026-10-30",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004505",
+            "payment_method": "gift_card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4505,
+                "sku": "PCK-30L-01",
+                "name": "Daytripper 30L Pack",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 89.0,
+                "original_price": 89.0,
+                "current_price": 89.0,
+                "final_sale": 0,
+                "category": "packs",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "lee.w@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 1
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4505,
+            "refund_method": "gift_card",
+            "items": [
+              {
+                "sku": "PCK-30L-01",
+                "qty": 1
+              }
+            ]
+          },
+          "output": {
+            "rma": "RMA-65342367",
+            "label_url": "https://northpeak.example/labels/4505",
+            "order_id": 4505,
+            "refund_method": "gift_card",
+            "items": [
+              {
+                "sku": "PCK-30L-01",
+                "qty": 1
+              }
+            ],
+            "value": 89.0
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        },
+        "judge": {
+          "pass": false,
+          "items": [
+            {
+              "item": "return started",
+              "type": "must_say",
+              "evidence": "Your return is started. RMA number: RMA-65342367",
+              "reasoning": "The reply explicitly states the return has been started and gives an RMA number and label.",
+              "verdict": "pass"
+            },
+            {
+              "item": "refund issued as a new gift card once the return is received",
+              "type": "must_say",
+              "evidence": "Refund: $81.05 ... back to your original payment method, the gift card. It's issued once the warehouse receives the pack",
+              "reasoning": "The reply says the refund goes back to the original payment method (the gift card), not that it is issued as a new gift card; this differs from the required meaning.",
+              "verdict": "fail"
+            },
+            {
+              "item": "$7.95 return fee taken out of the refund",
+              "type": "must_say",
+              "evidence": "Refund: $81.05 ($89.00 minus the $7.95 return fee)",
+              "reasoning": "The reply clearly states the $7.95 fee is deducted from the refund.",
+              "verdict": "pass"
+            },
+            {
+              "item": "refund to your card",
+              "type": "must_not_say",
+              "evidence": "Back to your original payment method, the gift card you paid with.",
+              "reasoning": "The reply says the refund goes to the gift card, not a credit/debit card, so it does not communicate a refund to a card.",
+              "verdict": "pass"
+            },
+            {
+              "item": "cash",
+              "type": "must_not_say",
+              "evidence": "none",
+              "reasoning": "The reply never mentions a cash refund.",
+              "verdict": "pass"
+            },
+            {
+              "item": "no return fee",
+              "type": "must_not_say",
+              "evidence": "Return shipping fee: $7.95. You're not a Plus member, so this comes out of your refund.",
+              "reasoning": "The reply states a return fee applies, so it does not say there is no fee.",
+              "verdict": "pass"
+            },
+            {
+              "item": "free return shipping",
+              "type": "must_not_say",
+              "evidence": "Prepaid label: https://northpeak.example/labels/4505 ... $7.95 return fee",
+              "reasoning": "The label is prepaid but the fee is deducted from the refund; the reply does not claim shipping is free.",
+              "verdict": "pass"
+            }
+          ],
+          "failed": [
+            "must_say: refund issued as a new gift card once the return is received"
+          ],
+          "nice_to_have_rate": null
+        }
+      },
+      "pass": false,
+      "latency_s": 15.6
+    },
+    {
+      "id": "edge_004",
+      "category": "edge_case",
+      "message": "order 4509, omar.h@email.com. my headlamp died after 5 weeks. i want my money back",
+      "reply": "Thanks, Omar. I've verified your account for order 4509 (Beacon 400 Headlamp, $45.00, delivered Oct 6).\n\nI can't refund your money. Refunds aren't available for this kind of problem. Because the headlamp failed after use, it falls under our warranty policy. Warranty claims are settled with a repair or a replacement, never a cash or card refund. If the headlamp can't be repaired or replaced, we can give store credit for the original price.\n\nTo start a warranty claim, please send me:\n1. Photos showing the defect (the headlamp that stopped working).\n2. Confirmation that this is the order you want to claim on (order 4509).\n\nOnce I have the photos, I can review the claim. Claims under $100 like this one can be approved right here.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "omar.h@email.com",
+            "order_id_or_zip": "4509"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4509
+          },
+          "output": {
+            "order_id": 4509,
+            "email": "omar.h@email.com",
+            "placed_at": "2026-09-30T10:00:00",
+            "ship_date": "2026-10-01",
+            "delivery_date": "2026-10-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004509",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4509,
+                "sku": "HDL-01",
+                "name": "Beacon 400 Headlamp",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 45.0,
+                "original_price": 45.0,
+                "current_price": 45.0,
+                "final_sale": 0,
+                "category": "electronics",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "omar.h@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "get_customer_history"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        },
+        "judge": {
+          "pass": false,
+          "items": [
+            {
+              "item": "past 30-day return window",
+              "type": "must_say",
+              "evidence": "\"Because the headlamp failed after use, it falls under our warranty policy.\" and \"Refunds aren't available for this kind of problem.\"",
+              "reasoning": "The reply never mentions the 30-day return window or says the purchase is past it; it only says warranty applies because the item failed after use.",
+              "verdict": "fail"
+            },
+            {
+              "item": "warranty claim instead",
+              "type": "must_say",
+              "evidence": "\"it falls under our warranty policy... To start a warranty claim, please send me:\"",
+              "reasoning": "The reply clearly directs the customer to a warranty claim instead of a refund.",
+              "verdict": "pass"
+            },
+            {
+              "item": "repair, replacement, or store credit - not a refund",
+              "type": "must_say",
+              "evidence": "\"Warranty claims are settled with a repair or a replacement, never a cash or card refund. If the headlamp can't be repaired or replaced, we can give store credit for the original price.\"",
+              "reasoning": "The reply states the remedies of repair, replacement, or store credit and explicitly says no refund.",
+              "verdict": "pass"
+            },
+            {
+              "item": "full refund to your card",
+              "type": "must_not_say",
+              "evidence": "\"I can't refund your money.\" and \"never a cash or card refund.\"",
+              "reasoning": "The reply explicitly denies a card refund and never offers one.",
+              "verdict": "pass"
+            },
+            {
+              "item": "needs photos of the defect",
+              "type": "nice_to_have",
+              "evidence": "\"Photos showing the defect (the headlamp that stopped working).\"",
+              "reasoning": "The reply explicitly asks for photos of the defect.",
+              "verdict": "pass"
+            }
+          ],
+          "failed": [
+            "must_say: past 30-day return window"
+          ],
+          "nice_to_have_rate": 1.0
+        }
+      },
+      "pass": false,
+      "latency_s": 11.3
+    },
+    {
+      "id": "edge_009",
+      "category": "edge_case",
+      "message": "the zipper on my summit series jacket broke. my brother bought it for me as a gift like 3 years ago. it has a lifetime warranty right?",
+      "reply": "I'm sorry about the zipper. Unfortunately, the lifetime warranty doesn't cover your jacket. It applies only to the original owner, and it doesn't transfer if the item is given away. Since your brother gave it to you as a gift, it isn't covered under that warranty.\n\nIs there anything else I can help you with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        },
+        "judge": {
+          "pass": true,
+          "items": [
+            {
+              "item": "not covered",
+              "type": "must_say",
+              "evidence": "\"Unfortunately, the lifetime warranty doesn't cover your jacket.\" and \"it isn't covered under that warranty.\"",
+              "reasoning": "The reply clearly tells the customer the jacket is not covered by the warranty.",
+              "verdict": "pass"
+            },
+            {
+              "item": "lifetime warranty doesn't transfer (original owner only)",
+              "type": "must_say",
+              "evidence": "\"It applies only to the original owner, and it doesn't transfer if the item is given away.\"",
+              "reasoning": "The reply explicitly states the warranty is for the original owner only and doesn't transfer.",
+              "verdict": "pass"
+            },
+            {
+              "item": "covered under lifetime warranty",
+              "type": "must_not_say",
+              "evidence": "\"the lifetime warranty doesn't cover your jacket... it isn't covered under that warranty.\"",
+              "reasoning": "The reply says the opposite, that the jacket is not covered, so it does not communicate coverage.",
+              "verdict": "pass"
+            },
+            {
+              "item": "we'll repair it for free",
+              "type": "must_not_say",
+              "evidence": "none",
+              "reasoning": "The reply never offers a free repair.",
+              "verdict": "pass"
+            },
+            {
+              "item": "standard 2-year warranty also expired",
+              "type": "nice_to_have",
+              "evidence": "none",
+              "reasoning": "The reply does not mention a standard 2-year warranty or its expiration.",
+              "verdict": "fail"
+            }
+          ],
+          "failed": [],
+          "nice_to_have_rate": 0.0
+        }
+      },
+      "pass": true,
+      "latency_s": 9.91
+    },
+    {
+      "id": "escalate_006",
+      "category": "escalate",
+      "message": "order 4526, liam.o@email.com. returning the sleeping pad, unused, just changed my mind",
+      "reply": "Thanks, Liam. I've verified your order and the sleeping pad is still within its return window. Because the refund for this item is over $200, I've passed your return to a human agent who will review it. Expect a reply within 2 business days.\n\nFor reference, the return would work like this: the Cloudrest Insulated Sleeping Pad ($250.00) is eligible as an unused item in its original condition. Since you're not a Plus member, there's a $7.95 return shipping fee, which comes out of the refund. Once the warehouse receives the item, the refund goes back to your original card, usually within 5\u20137 business days after that. The human agent will confirm the final details with you.\n---\nI'm sorry, Liam, but I can't start the return myself. Because the refund is over $200, it has to be approved by a human agent, and I've already sent your request to them (ticket TKT-984EBE). Please don't send the pad back until you hear from them. They'll reply within 2 business days with the return label and next steps.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "liam.o@email.com",
+            "order_id_or_zip": "4526"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4526
+          },
+          "output": {
+            "order_id": 4526,
+            "email": "liam.o@email.com",
+            "placed_at": "2026-10-22T10:00:00",
+            "ship_date": "2026-10-23",
+            "delivery_date": "2026-10-27",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004526",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4526,
+                "sku": "SLP-PAD-01",
+                "name": "Cloudrest Insulated Sleeping Pad",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 250.0,
+                "original_price": 250.0,
+                "current_price": 250.0,
+                "final_sale": 0,
+                "category": "camping",
+                "opened": 0
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "liam.o@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 0
+          }
+        },
+        {
+          "name": "escalate_to_human",
+          "input": {
+            "reason": "Customer Liam O. (order 4526, verified) requests a return of Cloudrest Insulated Sleeping Pad (SKU SLP-PAD-01), unused, changed mind. Delivered 2026-10-27, within 30-day non-Plus window (ends 2026-11-25). Non-Plus, 0 refunds in last 90 days. Item price $250.00, so refund (about $242.05 after $7.95 return fee) exceeds the $200 refund limit and requires human approval."
+          },
+          "output": {
+            "ticket": "TKT-984EBE",
+            "reason": "Customer Liam O. (order 4526, verified) requests a return of Cloudrest Insulated Sleeping Pad (SKU SLP-PAD-01), unused, changed mind. Delivered 2026-10-27, within 30-day non-Plus window (ends 2026-11-25). Non-Plus, 0 refunds in last 90 days. Item price $250.00, so refund (about $242.05 after $7.95 return fee) exceeds the $200 refund limit and requires human approval.",
+            "tell_customer": "reply within 2 business days"
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": true,
+          "actual": true,
+          "kind": "TP"
+        },
+        "judge": {
+          "pass": true,
+          "items": [
+            {
+              "item": "manager approval needed",
+              "type": "must_say",
+              "evidence": "\"Because the refund is over $200, it has to be approved by a human agent, and I've already sent your request to them (ticket TKT-984EBE).\"",
+              "reasoning": "The reply clearly says a human agent must approve the return, which conveys the meaning of manager/human approval being required.",
+              "verdict": "pass"
+            },
+            {
+              "item": "reply within 2 business days",
+              "type": "must_say",
+              "evidence": "\"They'll reply within 2 business days with the return label and next steps.\"",
+              "reasoning": "The reply explicitly states a response within 2 business days.",
+              "verdict": "pass"
+            },
+            {
+              "item": "refund issued",
+              "type": "must_not_say",
+              "evidence": "\"Once the warehouse receives the item, the refund goes back to your original card, usually within 5\u20137 business days after that.\"",
+              "reasoning": "The reply describes a future refund process but never says the refund has been issued; it states the return needs approval first.",
+              "verdict": "pass"
+            },
+            {
+              "item": "refund processed",
+              "type": "must_not_say",
+              "evidence": "\"I can't start the return myself... it has to be approved by a human agent\"",
+              "reasoning": "The reply does not claim the refund has been processed; it only describes how the refund would work after approval.",
+              "verdict": "pass"
+            },
+            {
+              "item": "$7.95 return fee applies",
+              "type": "nice_to_have",
+              "evidence": "\"Since you're not a Plus member, there's a $7.95 return shipping fee, which comes out of the refund.\"",
+              "reasoning": "The reply states the $7.95 return shipping fee applies and is deducted from the refund.",
+              "verdict": "pass"
+            }
+          ],
+          "failed": [],
+          "nice_to_have_rate": 1.0
+        }
+      },
+      "pass": true,
+      "latency_s": 12.52
+    }
+  ]
+}
