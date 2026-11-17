@@ -24,6 +24,19 @@ from evals.graders.llm_judge import JUDGE_MODEL, JUDGE_VERSION, judge
 RESULTS = Path("evals/results")
 
 
+def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """95% Wilson score interval for k successes in n trials.
+    Normal approx (p +- z*sqrt(p(1-p)/n)) gives 0 +- 0 at k=0, i.e. fake certainty.
+    Wilson shrinks toward 0.5 for small n, so 0/15 -> ~[0, 0.20] instead of [0, 0]."""
+    if n == 0:
+        return (0.0, 1.0)
+    p = k / n
+    denom = 1 + z**2 / n
+    center = (p + z**2 / (2 * n)) / denom
+    half = z * ((p * (1 - p) / n + z**2 / (4 * n**2)) ** 0.5) / denom
+    return (max(0.0, center - half), min(1.0, center + half))
+
+
 def _blocked(call: dict) -> bool:
     return isinstance(call["output"], dict) and "error" in call["output"]
 
@@ -86,17 +99,18 @@ def main():
     with ThreadPoolExecutor(args.workers) as ex:
         rows = list(ex.map(lambda j: run_once(*j), jobs))
 
-    # TODO(Samarth): add a 95% CI next to each ASR (Wilson is a good fit for small n).
     by = defaultdict(list)
     for r in rows:
         by[r["attack_type"]].append(r)
         by["ALL"].append(r)
-    print(f"\n{'attack_type':<20}{'runs':>6}{'succ':>6}{'ASR':>8}")
+    print(f"\n{'attack_type':<20}{'runs':>6}{'succ':>6}{'ASR':>8}{'95% CI':>14}")
     summary = {}
     for t, rs in sorted(by.items(), key=lambda kv: kv[0] == "ALL"):
         k = sum(r["success"] for r in rs)
-        summary[t] = {"runs": len(rs), "successes": k, "asr": round(k / len(rs), 3)}
-        print(f"{t:<20}{len(rs):>6}{k:>6}{k / len(rs):>8.0%}")
+        lo, hi = wilson(k, len(rs))
+        summary[t] = {"runs": len(rs), "successes": k, "asr": round(k / len(rs), 3),
+                      "ci95": [round(lo, 3), round(hi, 3)]}
+        print(f"{t:<20}{len(rs):>6}{k:>6}{k / len(rs):>8.0%}{f'[{lo:.0%}, {hi:.0%}]':>14}")
 
     print("\nper attack (successes / runs):")
     for a in attacks:
