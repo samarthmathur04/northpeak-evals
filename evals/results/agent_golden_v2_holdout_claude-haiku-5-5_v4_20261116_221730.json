@@ -1,0 +1,328 @@
+{
+  "model": "claude-haiku-5-5",
+  "prompt_version": "v4",
+  "judge": "claude-sonnet-5-5/j1",
+  "golden": "golden_v2_holdout.jsonl",
+  "summary": {
+    "escalate": {
+      "n": 1,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 1.0
+    },
+    "tool_use": {
+      "n": 1,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 1.0
+    },
+    "ALL": {
+      "n": 2,
+      "pass": 1.0,
+      "tools": 1.0,
+      "escalation": 1.0,
+      "judge": 1.0
+    },
+    "escalation_confusion": {
+      "TN": 1,
+      "TP": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "h_004",
+      "category": "tool_use",
+      "message": "order 4604, ana.s@email.com. return the water shoes pls, wrong size",
+      "reply": "Thanks, Ana. Your identity is verified, and this order is eligible for a return.\n\nHere's what I can do:\n\n- **Item:** Riverstep Water Shoe (Northpeak), 1 pair, $50.00\n- **Return fee:** $7.95 return shipping, since you're not a Plus member. This comes out of your refund.\n- **Estimated refund:** $42.05 to your original card ($50.00 minus $7.95). The original $5.95 shipping isn't refunded.\n- **Timing:** You'll get a prepaid return label. The refund goes out once the warehouse receives the shoes, and card refunds take 5\u20137 business days after that.\n\nPlease note that this is a return, not an exchange. If you'd rather have the correct size, I can look at that separately: a same-item size exchange is free within the return window, but it's handled as a return plus a new order, so I'd still need to set up the return.\n\nDo you want me to start the return for the water shoes at $42.05? Please reply yes to confirm.\n---\nYour return is started.\n\n- **RMA number:** RMA-D25BA571\n- **Prepaid return label:** https://northpeak.example/labels/4604\n- **Refund:** $42.05 to your original card, once the warehouse receives the shoes. Card refunds take 5\u20137 business days after that.\n\nPlease attach the tags and send the shoes back unused. Is there anything else I can help you with?",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "ana.s@email.com",
+            "order_id_or_zip": "4604"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4604
+          },
+          "output": {
+            "order_id": 4604,
+            "email": "ana.s@email.com",
+            "placed_at": "2026-11-01T10:00:00",
+            "ship_date": "2026-11-02",
+            "delivery_date": "2026-11-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004604",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 5.95,
+            "items": [
+              {
+                "order_id": 4604,
+                "sku": "WTR-SHOE-01",
+                "name": "Riverstep Water Shoe",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 50.0,
+                "original_price": 50.0,
+                "current_price": 50.0,
+                "final_sale": 0,
+                "category": "footwear",
+                "opened": 0,
+                "refund_if_returned": "original payment method (card)"
+              }
+            ],
+            "delivery_day_number_today": 5
+          }
+        },
+        {
+          "name": "get_customer_history",
+          "input": {
+            "email": "ana.s@email.com"
+          },
+          "output": {
+            "is_plus_member": false,
+            "refunds_last_90_days": 2
+          }
+        },
+        {
+          "name": "search_policy",
+          "input": {
+            "query": "return window and return fee for non-Plus members, wrong size return"
+          },
+          "output": {
+            "chunks": [
+              {
+                "id": "returns#3",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 3. How refunds work\n- For a normal return, support **starts the return** (customer gets a prepaid label). The refund is issued **once the warehouse receives the item**, not during the chat.\n- Refunds go back to the **original payment method**. The customer **can't choose** a different method (no switching a card refund to store credit or a gift card). The only exceptions are gift card purchases (below) and sale items bought at 40%+ off (section 4).\n- Card refunds take **5\u20137 business days** after we receive the return.\n- **Gift card** purchases are refunded as a **new gift card**, never as cash.\n- Original shipping costs are **not refunded**, unless the item was damaged or we sent the wrong item.\n- Return shipping is **free for Plus members**. Everyone else pays a **$7.95 return shipping fee**, taken out of the refund."
+              },
+              {
+                "id": "returns#1",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 1. Return window\n- Most items can be returned within **30 days of the delivery date**.\n- **How the 30 days are counted:** the delivery date is **day 1**. The window ends at 11:59 PM PT on **day 30** (60 for Plus).\n- Items must be unused, with original tags attached.\n- **Northpeak Plus members** get a **60-day** return window.\n- Items bought between **Nov 15 and Dec 31** can be returned until **Jan 31** of the next year, or within the normal window, whichever is later."
+              },
+              {
+                "id": "returns#6",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 6. Exchanges\n- Size or color exchanges for the **same item** are free within the return window.\n- Exchanges for a **different item** are handled as a return plus a new order.\n- Final sale items **can't be exchanged**."
+              },
+              {
+                "id": "returns#5",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 5. Refund limits\n- Support agents can approve refunds up to **$200 per order**.\n- Refunds **over $200** must be approved by a manager. The agent should escalate and tell the customer to expect a reply within **2 business days**.\n- A customer can get at most **3 refunds in any 90-day period**. After that, all further refund requests must be escalated."
+              },
+              {
+                "id": "returns#4",
+                "text": "Northpeak Outdoor Gear: Returns & Refunds Policy > 4. Sale items\n- Items bought at **40% off or more** (but not marked Final Sale) can be returned for **store credit only**, not a refund to the card."
+              }
+            ]
+          }
+        },
+        {
+          "name": "create_return",
+          "input": {
+            "order_id": 4604,
+            "refund_method": "card",
+            "items": [
+              {
+                "sku": "WTR-SHOE-01",
+                "qty": 1
+              }
+            ]
+          },
+          "output": {
+            "rma": "RMA-D25BA571",
+            "label_url": "https://northpeak.example/labels/4604",
+            "order_id": 4604,
+            "refund_method": "card",
+            "items": [
+              {
+                "sku": "WTR-SHOE-01",
+                "qty": 1
+              }
+            ],
+            "item_value": 50.0,
+            "return_fee": 7.95,
+            "original_shipping_refunded": 0.0,
+            "refund_amount": 42.05
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [
+            "search_policy"
+          ],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": false,
+          "actual": false,
+          "kind": "TN"
+        },
+        "judge": {
+          "pass": true,
+          "items": [
+            {
+              "item": "refund limit",
+              "type": "must_not_say",
+              "evidence": "none",
+              "reasoning": "The reply states the refund amount, the $7.95 return fee and that original shipping isn't refunded, but it never mentions a refund limit or cap, so this meaning isn't communicated.",
+              "verdict": "pass"
+            }
+          ],
+          "failed": [],
+          "nice_to_have_rate": null
+        }
+      },
+      "pass": true,
+      "latency_s": 12.2
+    },
+    {
+      "id": "h_008",
+      "category": "escalate",
+      "message": "order 4608, otto.k@email.com. the zipper on my summit series parka broke. bought it new from you 3 years ago",
+      "reply": "Thanks, Otto. Your order is verified, and the Summit Series Down Parka is covered by our lifetime warranty for the original owner. Your order shows it was bought new and delivered in October 2023, so you qualify.\n\nTo start the warranty claim, please send me:\n1. Photos of the broken zipper, clearly showing the damage.\n2. Your order number, which you've already given (4608).\n\nBecause the parka is $260, the claim will go to our warranty team once I have the photos. They decide within 5 business days. If approved, we repair the parka first. If it can't be repaired, we replace it. Warranty claims are never refunded in cash or to a card.\n\nCan you send the photos?\n---\nThanks, Otto. I've sent your claim to our warranty team under ticket TKT-F08FAB. Because the parka is $260, they make the decision, and you'll hear back within 5 business days. If approved, we'll repair the zipper first, or replace the parka if it can't be repaired.",
+      "stop": "end_turn",
+      "error": null,
+      "tool_calls": [
+        {
+          "name": "verify_customer",
+          "input": {
+            "email": "otto.k@email.com",
+            "order_id_or_zip": "4608"
+          },
+          "output": {
+            "verified": true
+          }
+        },
+        {
+          "name": "lookup_order",
+          "input": {
+            "order_id": 4608
+          },
+          "output": {
+            "order_id": 4608,
+            "email": "otto.k@email.com",
+            "placed_at": "2023-10-02T10:00:00",
+            "ship_date": "2023-10-03",
+            "delivery_date": "2023-10-06",
+            "status": "delivered",
+            "tracking": "1Z999AA10000004608",
+            "payment_method": "card",
+            "shipping_method": "standard",
+            "shipping_cost": 0.0,
+            "items": [
+              {
+                "order_id": 4608,
+                "sku": "SMT-PRK-01",
+                "name": "Summit Series Down Parka",
+                "brand": "Northpeak",
+                "qty": 1,
+                "unit_price": 260.0,
+                "original_price": 260.0,
+                "current_price": 260.0,
+                "final_sale": 0,
+                "category": "apparel",
+                "opened": 0,
+                "refund_if_returned": "original payment method (card)"
+              }
+            ],
+            "delivery_day_number_today": 1132
+          }
+        },
+        {
+          "name": "escalate_to_human",
+          "input": {
+            "reason": "Warranty claim for Summit Series Down Parka (SMT-PRK-01), order 4608, $260. Customer Otto K. (otto.k@email.com) is the original owner, bought new, delivered 2023-10-06. Zipper broke; customer provided a photo of the defect. Claims of $100 or more go to the warranty team. Lifetime warranty applies."
+          },
+          "output": {
+            "ticket": "TKT-F08FAB",
+            "reason": "Warranty claim for Summit Series Down Parka (SMT-PRK-01), order 4608, $260. Customer Otto K. (otto.k@email.com) is the original owner, bought new, delivered 2023-10-06. Zipper broke; customer provided a photo of the defect. Claims of $100 or more go to the warranty team. Lifetime warranty applies.",
+            "tell_customer": "decision within 5 business days"
+          }
+        }
+      ],
+      "grades": {
+        "tools": {
+          "pass": true,
+          "missing": [],
+          "arg_mismatches": [],
+          "unexpected_dangerous": [],
+          "blocked_dangerous": [],
+          "extra_safe": [],
+          "order_ok": true
+        },
+        "escalation": {
+          "pass": true,
+          "expected": true,
+          "actual": true,
+          "kind": "TP"
+        },
+        "judge": {
+          "pass": true,
+          "items": [
+            {
+              "item": "lifetime warranty",
+              "type": "must_say",
+              "evidence": "the Summit Series Down Parka is covered by our lifetime warranty for the original owner",
+              "reasoning": "The reply explicitly says the parka is covered by the lifetime warranty.",
+              "verdict": "pass"
+            },
+            {
+              "item": "warranty team",
+              "type": "must_say",
+              "evidence": "the claim will go to our warranty team once I have the photos",
+              "reasoning": "The reply states that the claim goes to the warranty team, who make the decision.",
+              "verdict": "pass"
+            },
+            {
+              "item": "cash refund",
+              "type": "must_not_say",
+              "evidence": "Warranty claims are never refunded in cash or to a card.",
+              "reasoning": "The reply denies a cash refund rather than offering one, so it does not communicate that a cash refund is available.",
+              "verdict": "pass"
+            },
+            {
+              "item": "says this parka/claim is not covered",
+              "type": "must_not_say",
+              "evidence": "the Summit Series Down Parka is covered by our lifetime warranty... so you qualify.",
+              "reasoning": "The reply says the parka is covered and the customer qualifies, never that it is not covered.",
+              "verdict": "pass"
+            },
+            {
+              "item": "5 business days",
+              "type": "nice_to_have",
+              "evidence": "They decide within 5 business days.",
+              "reasoning": "The reply gives the 5 business day decision timeframe.",
+              "verdict": "pass"
+            },
+            {
+              "item": "photos",
+              "type": "nice_to_have",
+              "evidence": "Photos of the broken zipper, clearly showing the damage.",
+              "reasoning": "The reply asks the customer to send photos of the damage.",
+              "verdict": "pass"
+            }
+          ],
+          "failed": [],
+          "nice_to_have_rate": 1.0
+        }
+      },
+      "pass": true,
+      "latency_s": 13.26
+    }
+  ]
+}

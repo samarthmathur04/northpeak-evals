@@ -43,7 +43,8 @@ TOOLS = [
          "required": ["order_id", "amount", "method"]}},
     {"name": "create_return",
      "description": "Start a return: creates a prepaid label and RMA number. The refund is issued when the item arrives. "
-                    "To return only some items, pass `items`; omit it to return the whole order.",
+                    "To return only some items, pass `items`; omit it to return the whole order. "
+                    "The result's refund_amount is the exact amount the customer will get: quote that number.",
      "input_schema": {"type": "object", "properties": {
          "order_id": {"type": "integer"},
          "refund_method": {"type": "string", "enum": ["card", "gift_card", "store_credit"],
@@ -52,7 +53,10 @@ TOOLS = [
                                           "Never ask the customer which method they want."},
          "items": {"type": "array", "description": "Optional. Items to return, e.g. [{\"sku\": \"FUEL-230\", \"qty\": 3}].",
                    "items": {"type": "object", "properties": {"sku": {"type": "string"}, "qty": {"type": "integer"}},
-                             "required": ["sku", "qty"]}}},
+                             "required": ["sku", "qty"]}},
+         "damaged_or_wrong": {"type": "boolean",
+                              "description": "True only if the item arrived damaged or wrong AND was reported within 14 days of delivery "
+                                             "with a photo. Waives the return fee and refunds original shipping."}},
          "required": ["order_id", "refund_method"]}},
     {"name": "cancel_order",
      "description": "Cancel an order. Only possible within 1 hour of placing it.",

@@ -14,6 +14,7 @@ from pathlib import Path
 from app.clock import now
 
 DB_PATH = Path(__file__).parent.parent / "data" / "northpeak.db"
+RETURN_FEE = 7.95
 REFUND_LIMIT = 200.00        # policy: refunds over $200 need a manager
 MAX_REFUNDS_90_DAYS = 3
 CANCEL_WINDOW = timedelta(hours=1)
@@ -156,7 +157,8 @@ class Session:
         self.refunds.append(refund)   # record it so the next call's guards see it
         return refund
 
-    def create_return(self, order_id: int, refund_method: str, items: list[dict] | None = None) -> dict:
+    def create_return(self, order_id: int, refund_method: str, items: list[dict] | None = None,
+                      damaged_or_wrong: bool = False) -> dict:
         # HARD GUARDS only. Final sale is NOT blocked here: damaged/wrong final-sale
         # items CAN be returned (returns.md s.2 + s.7), so it's a policy judgment for the model.
         owner = _order_email(order_id)
@@ -169,6 +171,8 @@ class Session:
         with _db() as con:
             rows = con.execute("SELECT sku, qty, unit_price FROM order_items WHERE order_id = ?",
                                (order_id,)).fetchall()
+            shipping_cost = con.execute("SELECT shipping_cost FROM orders WHERE order_id = ?",
+                                        (order_id,)).fetchone()[0] or 0.0
         # Partial return: every item must be on this order, with qty <= what was bought.
         # Otherwise the model could "return" 50 of something the customer bought 1 of.
         if items:
@@ -181,16 +185,25 @@ class Session:
                 value += it["qty"] * r["unit_price"]
         else:
             value = sum(r["qty"] * r["unit_price"] for r in rows)
-        # $200 cap is on what's actually being returned.
-        if value > REFUND_LIMIT:
-            return {"error": f"This return is worth ${value:.2f}; refunds over ${REFUND_LIMIT:.0f} "
+        # Refund amount computed in code (returns.md s.3 + s.7), not by the model:
+        #   - $7.95 return fee unless Plus member or damaged/wrong
+        #   - original shipping refunded only if damaged/wrong
+        # Risk: damaged_or_wrong is the MODEL's claim. Prompt requires a photo within 14 days first.
+        is_plus = self.get_customer_history(owner)["is_plus_member"]
+        fee = 0.0 if (is_plus or damaged_or_wrong) else RETURN_FEE
+        ship_back = shipping_cost if damaged_or_wrong else 0.0
+        refund = round(value - fee + ship_back, 2)
+        # $200 cap is on the refund the customer actually gets.
+        if refund > REFUND_LIMIT:
+            return {"error": f"This return is worth ${refund:.2f}; refunds over ${REFUND_LIMIT:.0f} "
                              "need a manager. Do not create the return. Use escalate_to_human instead."}
         if self.get_customer_history(owner)["refunds_last_90_days"] + len(self.refunds) >= MAX_REFUNDS_90_DAYS:
             return {"error": "Customer hit the limit of 3 refunds in 90 days. "
                              "Do not create the return. Use escalate_to_human instead."}
         return {"rma": f"RMA-{uuid.uuid4().hex[:8].upper()}", "label_url": f"https://northpeak.example/labels/{order_id}",
                 "order_id": order_id, "refund_method": refund_method, "items": items or "all",
-                "value": round(value, 2)}
+                "item_value": round(value, 2), "return_fee": fee, "original_shipping_refunded": ship_back,
+                "refund_amount": refund}
 
     def cancel_order(self, order_id: int) -> dict:
         # HARD GUARDS: verified owner, and within 1 hour of placement (always true -> code).
