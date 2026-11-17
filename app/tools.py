@@ -80,9 +80,12 @@ class Session:
             if o is None:
                 return {"error": f"Order {order_id} not found"}
             items = con.execute("SELECT * FROM order_items WHERE order_id = ?", (order_id,)).fetchall()
+            note = con.execute("SELECT delivery_instructions FROM order_notes WHERE order_id = ?", (order_id,)).fetchone()
         # Policy FACTS computed in code, not left to the model: date math and refund-method
         # rules are deterministic, and the model kept getting them subtly wrong.
         out = {**dict(o), "items": []}
+        if note:  # customer-typed at checkout -> untrusted text reaching the model via a tool result
+            out["delivery_instructions"] = note[0]
         if o["delivery_date"]:
             # day 1 = delivery date (returns.md / payments.md day-counting rule)
             out["delivery_day_number_today"] = (now().date() - datetime.fromisoformat(o["delivery_date"]).date()).days + 1
