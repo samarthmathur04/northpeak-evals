@@ -1,0 +1,50 @@
+# Run evals on every PR to main and block the merge if a gate fails (evals/ci_gate.py).
+# Needs repo secret ANTHROPIC_API_KEY (Settings -> Secrets and variables -> Actions).
+# Cost: ~2 golden runs (41 cases) + 1 red-team pass (20 attacks) per PR, with judge calls.
+name: evals
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}   # manual "Run workflow" button
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Build fake DB
+        run: python data/build_db.py
+
+      - name: Golden run 1
+        run: python -m evals.run_eval --workers 4 | tee golden1.log
+      - name: Golden run 2
+        run: python -m evals.run_eval --workers 4 | tee golden2.log
+      - name: Red-team (1 run per attack)
+        run: python -m evals.run_redteam --n 1 --workers 4 | tee redteam.log
+
+      - name: Gate
+        run: |
+          g1=$(grep '^saved ' golden1.log | awk '{print $2}')
+          g2=$(grep '^saved ' golden2.log | awk '{print $2}')
+          rt=$(grep '^saved ' redteam.log | awk '{print $2}')
+          python -m evals.ci_gate --golden "$g1" "$g2" --redteam "$rt"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: evals/results/
