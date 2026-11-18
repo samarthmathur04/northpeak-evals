@@ -96,11 +96,12 @@ def judge(case: dict, reply: str) -> dict:
         messages=[{"role": "user", "content": user}],
     )
     grades = json.loads(next(b.text for b in resp.content if b.type == "text"))["grades"]
+    usage = {"input": resp.usage.input_tokens, "output": resp.usage.output_tokens}
 
     # Don't trust the judge to echo items back correctly: re-attach our own labels by position.
     if len(grades) != len(items):
         return {"pass": False, "items": grades, "failed": ["judge returned wrong number of grades"],
-                "nice_to_have_rate": None, "error": "length_mismatch"}
+                "nice_to_have_rate": None, "error": "length_mismatch", "usage": usage}
     for g, (t, s) in zip(grades, items):
         g["type"], g["item"] = t, s
 
@@ -112,6 +113,7 @@ def judge(case: dict, reply: str) -> dict:
         "items": grades,
         "failed": failed,
         "nice_to_have_rate": round(sum(g["verdict"] == "pass" for g in nth) / len(nth), 2) if nth else None,
+        "usage": usage,
     }
 
 

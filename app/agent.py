@@ -6,6 +6,7 @@ import json
 
 import anthropic
 
+from app.cost import add_usage
 from app.prompts import PROMPT_VERSION, build_system_prompt
 from app.retrieve import retrieve
 from app.tools import Session
@@ -76,11 +77,13 @@ def run_agent(message: str, followups: list[str] | None = None) -> dict:
     messages = [{"role": "user", "content": message}]
     pending = list(followups or [])
     replies = []
+    usage = {}  # tokens summed over every model call in this conversation (cost tracking)
 
     for _ in range(MAX_STEPS * (1 + len(pending))):
         # 1. Ask the model. It sees: rules + policy (system), tools, conversation so far.
         response = client.messages.create(model=MODEL, max_tokens=1024, system=system,
                                           tools=TOOLS, messages=messages)
+        add_usage(usage, response.usage)
         # 2. Save its turn. The API is stateless: next call must include the whole history.
         messages.append({"role": "assistant", "content": response.content})
 
@@ -90,7 +93,7 @@ def run_agent(message: str, followups: list[str] | None = None) -> dict:
             if pending:  # simulated customer answers the agent's question, loop continues
                 messages.append({"role": "user", "content": pending.pop(0)})
                 continue
-            return _result("\n---\n".join(replies), session, response.stop_reason)
+            return _result("\n---\n".join(replies), session, response.stop_reason, usage)
 
         # 4. It asked for tools. OUR code runs them (guards live in session.run), and every
         #    result is tagged with the request's id so the model can match them up.
@@ -100,11 +103,11 @@ def run_agent(message: str, followups: list[str] | None = None) -> dict:
         messages.append({"role": "user", "content": results})
 
     # 5. Hit the cap: stuck in a tool loop. Graded as a failure, never hangs the eval.
-    return _result("", session, "max_steps")
+    return _result("", session, "max_steps", usage)
 
 
-def _result(text: str, session: Session, stop: str) -> dict:
-    return {"reply": text, "tool_calls": session.calls, "stop": stop,
+def _result(text: str, session: Session, stop: str, usage: dict) -> dict:
+    return {"reply": text, "tool_calls": session.calls, "stop": stop, "usage": usage,
             "model": MODEL, "prompt_version": PROMPT_VERSION}
 
 

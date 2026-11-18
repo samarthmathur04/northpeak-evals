@@ -12,6 +12,7 @@ Usage:
 import argparse
 import json
 import re
+import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -19,6 +20,7 @@ from pathlib import Path
 
 from app.agent import MODEL, run_agent
 from app.prompts import PROMPT_VERSION
+from app.cost import dollars
 from evals.graders.llm_judge import JUDGE_MODEL, JUDGE_VERSION, judge
 
 RESULTS = Path("evals/results")
@@ -56,6 +58,7 @@ def _forbidden_hits(forbidden: list[str], calls: list[dict]) -> list[dict]:
 
 
 def run_once(attack: dict, run_i: int) -> dict:
+    t0 = time.time()
     try:
         result = run_agent(attack["message"], attack.get("followups"))
         error = None
@@ -82,8 +85,30 @@ def run_once(attack: dict, run_i: int) -> dict:
         "judge_failed": said.get("failed", []), "judge_error": said.get("error"),
         "blocked_dangerous": [{"name": c["name"], "input": c["input"]} for c in calls if _blocked(c)],
         "reply": result["reply"], "error": error,
+        "usage": result.get("usage", {}), "judge_usage": said.get("usage", {}),
+        "latency_s": round(time.time() - t0, 2),
         "tool_calls": [{"name": c["name"], "input": c["input"], "output": c["output"]} for c in calls],
     }
+
+
+def cost_summary(rows: list[dict], judge_key) -> dict:
+    """$ and tokens for agent + judge, plus latency. judge_key(row) -> the judge result dict."""
+    agent_u, judge_u = {}, {}
+    for r in rows:
+        for k, v in (r.get("usage") or {}).items():
+            agent_u[k] = agent_u.get(k, 0) + v
+        for k, v in ((judge_key(r) or {}).get("usage") or {}).items():
+            judge_u[k] = judge_u.get(k, 0) + v
+    a, j = dollars(MODEL, agent_u), dollars(JUDGE_MODEL, judge_u)
+    lat = sorted(r["latency_s"] for r in rows if r.get("latency_s") is not None)
+    out = {"agent_tokens": agent_u, "judge_tokens": judge_u,
+           "agent_usd": round(a, 4), "judge_usd": round(j, 4), "total_usd": round(a + j, 4),
+           "usd_per_case": round((a + j) / len(rows), 5) if rows else 0}
+    if lat:
+        out |= {"latency_p50_s": lat[len(lat) // 2], "latency_p90_s": lat[round(0.9 * (len(lat) - 1))]}
+    print(f"cost: agent ${a:.3f} + judge ${j:.3f} = ${a + j:.3f}  (${(a + j) / max(len(rows), 1):.4f}/case)"
+          + (f"   latency p50 {out['latency_p50_s']}s p90 {out['latency_p90_s']}s" if lat else ""))
+    return out
 
 
 def main():
@@ -133,6 +158,7 @@ def main():
                 + [f"said: {f}" for f in r["judge_failed"]]
             print(f"  SUCCESS {r['id']} run {r['run']}: {'; '.join(map(str, why))}")
 
+    summary["cost"] = cost_summary(rows, lambda r: {"usage": r.get("judge_usage")})
     RESULTS.mkdir(exist_ok=True)
     out = RESULTS / f"redteam_{path.stem}_{MODEL}_{PROMPT_VERSION}_{datetime.now():%Y%m%d_%H%M%S}.json"
     out.write_text(json.dumps({"model": MODEL, "prompt_version": PROMPT_VERSION,

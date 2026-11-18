@@ -16,6 +16,7 @@ from pathlib import Path
 from app.agent import MODEL, run_agent
 from app.prompts import PROMPT_VERSION
 from evals.graders.code_graders import grade_escalation, grade_tool_calls
+from app.cost import dollars
 from evals.graders.llm_judge import JUDGE_MODEL, JUDGE_VERSION, judge
 
 RESULTS = Path("evals/results")
@@ -42,7 +43,7 @@ def run_case(case: dict) -> dict:
                        for c in result["tool_calls"]],
         "grades": {"tools": tools, "escalation": esc, "judge": text},
         "pass": tools["pass"] and esc["pass"] and text["pass"] and error is None,
-        "latency_s": round(time.time() - t0, 2),
+        "latency_s": round(time.time() - t0, 2), "usage": result.get("usage", {}),
     }
 
 
@@ -68,6 +69,26 @@ def summarize(rows: list[dict]) -> dict:
     return summary
 
 
+def cost_summary(rows: list[dict], judge_key) -> dict:
+    """$ and tokens for agent + judge, plus latency. judge_key(row) -> the judge result dict."""
+    agent_u, judge_u = {}, {}
+    for r in rows:
+        for k, v in (r.get("usage") or {}).items():
+            agent_u[k] = agent_u.get(k, 0) + v
+        for k, v in ((judge_key(r) or {}).get("usage") or {}).items():
+            judge_u[k] = judge_u.get(k, 0) + v
+    a, j = dollars(MODEL, agent_u), dollars(JUDGE_MODEL, judge_u)
+    lat = sorted(r["latency_s"] for r in rows if r.get("latency_s") is not None)
+    out = {"agent_tokens": agent_u, "judge_tokens": judge_u,
+           "agent_usd": round(a, 4), "judge_usd": round(j, 4), "total_usd": round(a + j, 4),
+           "usd_per_case": round((a + j) / len(rows), 5) if rows else 0}
+    if lat:
+        out |= {"latency_p50_s": lat[len(lat) // 2], "latency_p90_s": lat[round(0.9 * (len(lat) - 1))]}
+    print(f"cost: agent ${a:.3f} + judge ${j:.3f} = ${a + j:.3f}  (${(a + j) / max(len(rows), 1):.4f}/case)"
+          + (f"   latency p50 {out['latency_p50_s']}s p90 {out['latency_p90_s']}s" if lat else ""))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", nargs="*")
@@ -90,9 +111,10 @@ def main():
         rows = list(ex.map(run_case, cases))
 
     summary = summarize(rows)
+    summary["cost"] = cost_summary(rows, lambda r: r["grades"]["judge"])
     print(f"\n{'category':<15}{'n':>4}{'pass':>8}{'tools':>8}{'esc':>8}{'judge':>8}")
     for cat, s in summary.items():
-        if cat != "escalation_confusion":
+        if cat not in ("escalation_confusion", "cost"):
             print(f"{cat:<15}{s['n']:>4}{s['pass']:>8.0%}{s['tools']:>8.0%}{s['escalation']:>8.0%}{s['judge']:>8.0%}")
     print("escalation:", summary["escalation_confusion"])
     print("\nFAILED:", ", ".join(r["id"] for r in rows if not r["pass"]) or "none")
